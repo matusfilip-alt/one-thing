@@ -114,8 +114,9 @@ body.calm .lvl .dot { animation: none; }
 .first .k { font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--sub); white-space: nowrap; padding-top: 2px; }
 
 .subs { margin-top: 18px; text-align: left; margin-inline: auto; width: fit-content; min-width: min(280px, 100%); max-width: 100%; }
-.sub { display: flex; align-items: flex-start; gap: 11px; width: 100%; text-align: left; font: inherit; font-size: 15px;
-  background: none; border: none; cursor: pointer; padding: 9px 10px 9px 8px; margin-left: -8px; border-radius: 10px; color: var(--ink); }
+.sub { display: flex; align-items: flex-start; gap: 4px; width: 100%; border-radius: 10px; margin-left: -8px; }
+.subtog { display: flex; align-items: flex-start; gap: 11px; flex: 1; min-width: 0; text-align: left; font: inherit; font-size: 15px;
+  background: none; border: none; cursor: pointer; padding: 9px 4px 9px 8px; border-radius: 10px; color: var(--ink); }
 .sub .box { flex: 0 0 19px; width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid var(--faint); margin-top: 2px; position: relative; transition: background .2s, border-color .2s; }
 .sub.on .box { background: var(--green); border-color: var(--green); }
 .sub.on .box::after { content: ""; position: absolute; left: 6px; top: 3px; width: 5px; height: 9px;
@@ -124,6 +125,28 @@ body.calm .lvl .dot { animation: none; }
 .sub.on .lbl { color: var(--faint); text-decoration: line-through; }
 .sub.next .lbl { font-weight: 590; }
 .sub.next .box { border-color: var(--u); border-width: 2px; }
+.subedit { flex: 0 0 30px; align-self: center; background: none; border: none; cursor: pointer; color: var(--faint);
+  font-size: 13px; padding: 8px 6px; border-radius: 8px; opacity: .45; transition: opacity .2s, color .2s; }
+.subedit:hover { opacity: 1; color: var(--ink); }
+
+/* inline editing */
+.editable { cursor: text; }
+.editable:hover { text-decoration: underline; text-decoration-color: var(--faint); text-underline-offset: 5px; text-decoration-thickness: 1px; }
+.edtitle {
+  font: inherit; font-size: clamp(26px, 7vw, 40px); font-weight: 600; line-height: 1.12; letter-spacing: -.028em;
+  color: var(--ut, var(--ink)); text-align: center; width: min(20ch, 100%); background: transparent;
+  border: none; border-bottom: 2px solid var(--u, var(--faint)); padding: 0 0 4px; resize: none; overflow: hidden;
+}
+.edtitle:focus { outline: none; }
+.edstep { font: inherit; font-size: 14.5px; background: transparent; border: none; border-bottom: 1px solid var(--faint);
+  padding: 2px 0; min-width: 200px; color: var(--ink); }
+.edstep:focus { outline: none; border-color: var(--u); }
+.edsub { font: inherit; font-size: 15px; flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--u);
+  padding: 8px 0; color: var(--ink); min-width: 0; }
+.edsub:focus { outline: none; }
+.edhint { font-size: 11px; color: var(--faint); margin-top: 8px; }
+.addstep { font: inherit; font-size: 13px; color: var(--faint); background: none; border: none; cursor: pointer; margin-top: 14px; }
+.addstep:hover { color: var(--sub); }
 .subadd { display: flex; align-items: center; gap: 11px; }
 .subadd .plus { flex: 0 0 19px; width: 19px; height: 19px; border-radius: 50%; border: 1.5px dashed var(--faint); color: var(--faint); font-size: 13px; line-height: 16px; text-align: center; }
 .subadd input { font: inherit; font-size: 15px; border: none; background: transparent; padding: 9px 0; width: 100%; color: var(--ink); }
@@ -324,7 +347,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
   // tasks keyed by id; every record carries updatedAt so two devices can merge
   var state = { tasks: {}, rev: 0 };
   var localOnly = {};   // skips / parked, never synced
-  var current = 'work', newPrio = 5, refocusSub = false;
+  var current = 'work', newPrio = 5, refocusSub = false, editing = null;
   var timer = { id: null, left: 0, running: false };
   var pushT = null, pulling = false, lastRemote = null, calm = false;
 
@@ -394,6 +417,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 
   async function pull(quiet) {
     if (pulling) return;
+    if (editing && quiet) return;   // never yank the card out from under an open editor
     pulling = true;
     if (!quiet) setSync('busy', 'Syncing…');
     try {
@@ -483,10 +507,31 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     var m = lo(t.id);
     var vars = '--u:' + k.color + ';--ut:' + k.text + ';--glow0:' + k.glow0 + ';--glow1:' + k.glow1 +
                ';--tint:' + k.tint + ';--ringdur:' + k.ringdur + ';--tdur:' + k.tdur + ';--amp:' + k.amp + ';';
+    var ed = editing && editing.id === t.id ? editing : null;
+
     var subHtml = subs.map(function (s, i) {
-      return '<button class="sub' + (s.done ? ' on' : '') + (i === nextI ? ' next' : '') + '" data-sub="' + i + '">' +
-        '<span class="box"></span><span class="lbl">' + escH(s.text) + '</span></button>';
+      if (ed && ed.field === 'sub' && ed.index === i) {
+        return '<div class="sub"><span class="box" style="margin:10px 0 0 8px"></span>' +
+          '<input class="edsub" id="edField" value="' + escH(s.text) + '" maxlength="140"></div>';
+      }
+      return '<div class="sub' + (s.done ? ' on' : '') + (i === nextI ? ' next' : '') + '">' +
+        '<button class="subtog" data-sub="' + i + '"><span class="box"></span><span class="lbl">' + escH(s.text) + '</span></button>' +
+        '<button class="subedit" data-subedit="' + i + '" title="Edit or delete">✎</button></div>';
     }).join('');
+
+    var titleHtml = (ed && ed.field === 'title')
+      ? '<textarea class="edtitle" id="edField" rows="2" maxlength="140">' + escH(t.title) + '</textarea><div class="edhint">Enter to save · Esc to cancel</div>'
+      : '<div class="title editable" data-edit="title" title="Click to rename">' + escH(t.title) + '</div>';
+
+    var stepHtml;
+    if (ed && ed.field === 'step') {
+      stepHtml = '<div class="first"><span class="k">Start by</span><input class="edstep" id="edField" value="' + escH(t.step || '') + '" maxlength="140" placeholder="open the file, call X…"></div>';
+    } else if (t.step) {
+      stepHtml = '<div class="first"><span class="k">Start by</span><span class="editable" data-edit="step">' + escH(t.step) + '</span></div>';
+    } else {
+      stepHtml = '<button class="addstep" data-edit="step">+ add a first physical action</button>';
+    }
+
     el.innerHTML =
       '<div class="hero edge ring tremor" style="' + vars + '">' +
         '<div>' +
@@ -497,8 +542,8 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
             (subs.length ? '<span class="sep"></span><span class="prog"><span class="track"><span class="fill" style="width:' + Math.round(doneN / subs.length * 100) + '%"></span></span>' + doneN + '/' + subs.length + '</span>' : '') +
             (m.skips > 1 ? '<span class="sep"></span><span class="muted hot">skipped ' + m.skips + '×</span>' : '') +
           '</div>' +
-          '<div class="title">' + escH(t.title) + '</div>' +
-          (t.step ? '<div class="first"><span class="k">Start by</span><span>' + escH(t.step) + '</span></div>' : '') +
+          titleHtml +
+          stepHtml +
           '<div class="subs">' + subHtml +
             '<div class="subadd"><span class="plus">+</span><input id="subAdd" placeholder="' + (subs.length ? 'Add another step' : 'Break it into steps') + '" maxlength="140"></div>' +
           '</div>' +
@@ -520,6 +565,38 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
         t.subs = t.subs || []; t.subs.push({ text: v, done: false }); touch(t);
       });
       if (refocusSub) { refocusSub = false; sa.focus(); }
+    }
+
+    // an open editor gets focus, and commits on Enter or blur
+    var f = document.getElementById('edField');
+    if (f && ed) {
+      f.focus();
+      if (f.setSelectionRange) { try { f.setSelectionRange(f.value.length, f.value.length); } catch (e2) {} }
+      var done = false;
+      var commit = function (save) {
+        if (done) return; done = true;
+        var val = f.value.trim();
+        var task = state.tasks[ed.id];
+        editing = null;
+        if (save && task) {
+          if (ed.field === 'title') { if (val) { task.title = val; touch(task); return; } }
+          else if (ed.field === 'step') { if (val !== (task.step || '')) { task.step = val; touch(task); return; } }
+          else if (ed.field === 'sub') {
+            var s = (task.subs || [])[ed.index];
+            if (s) {
+              if (!val) task.subs.splice(ed.index, 1);       // cleared text removes the step
+              else s.text = val;
+              touch(task); return;
+            }
+          }
+        }
+        render();
+      };
+      f.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); commit(true); }
+        else if (e.key === 'Escape') { e.preventDefault(); commit(false); }
+      });
+      f.addEventListener('blur', function () { commit(true); });
     }
   }
 
@@ -674,6 +751,10 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 
     document.getElementById('hero').addEventListener('click', function (e) {
       var t = topOf(current); if (!t) return;
+      var ee = e.target.closest('[data-edit]');
+      if (ee) { editing = { id: t.id, field: ee.dataset.edit }; render(); return; }
+      var se = e.target.closest('[data-subedit]');
+      if (se) { editing = { id: t.id, field: 'sub', index: parseInt(se.dataset.subedit, 10) }; render(); return; }
       var s = e.target.closest('[data-sub]');
       if (s) { var i = parseInt(s.dataset.sub, 10); t.subs[i].done = !t.subs[i].done; touch(t); return; }
       var b = e.target.closest('[data-do]'); if (!b) return;
@@ -753,7 +834,8 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       var t = topOf(current), k = e.key.toLowerCase();
       if (k === 'n') { e.preventDefault(); document.getElementById('fTitle').focus(); return; }
       if (!t) return;
-      if (k === 'd') complete(t.id);
+      if (k === 'e') { e.preventDefault(); editing = { id: t.id, field: 'title' }; render(); }
+      else if (k === 'd') complete(t.id);
       else if (k === 's') skip(t.id);
       else if (k === 't') startTimer(15);
       else if (k === 'b') { e.preventDefault(); var sa = document.getElementById('subAdd'); if (sa) sa.focus(); }
