@@ -15,7 +15,7 @@
 :root {
   color-scheme: light;
   --bg: #f5f5f7; --card: #ffffff; --ink: #1d1d1f; --sub: #86868b; --faint: #c7c7cc;
-  --hair: rgba(0,0,0,0.07); --green: #30b866; --r: 22px;
+  --hair: rgba(0,0,0,0.07); --green: #30b866; --red: #ff3b30; --r: 22px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html { -webkit-font-smoothing: antialiased; }
@@ -25,8 +25,26 @@ body {
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 .wrap { max-width: 780px; margin: 0 auto; padding: 28px 18px 60px; }
+.hide { display: none !important; }
 
-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
+/* ── lock screen ── */
+#lock { max-width: 420px; margin: 0 auto; padding: 60px 20px; }
+#lock .mark { width: 54px; height: 54px; margin: 0 auto 26px; position: relative; }
+#lock .mark i { position: absolute; left: 21px; top: 4px; width: 12px; height: 30px; border-radius: 6px; background: var(--red); display: block; }
+#lock .mark s { position: absolute; left: 21px; bottom: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--red); display: block; }
+#lock h1 { font-size: 26px; font-weight: 600; letter-spacing: -.03em; text-align: center; margin-bottom: 8px; }
+#lock p { font-size: 14px; color: var(--sub); text-align: center; margin-bottom: 26px; }
+#lock input { font: inherit; font-size: 17px; width: 100%; padding: 15px 16px; border: 1px solid var(--hair);
+  border-radius: 14px; background: var(--card); color: var(--ink); text-align: center; }
+#lock input:focus { outline: none; border-color: var(--sub); }
+#lock button { font: inherit; font-size: 15px; font-weight: 500; width: 100%; margin-top: 10px; padding: 14px;
+  border-radius: 980px; border: none; background: var(--ink); color: #fff; cursor: pointer; }
+#lock button:disabled { opacity: .4; }
+#lock .warn { font-size: 12.5px; color: var(--red); text-align: center; margin-top: 12px; min-height: 18px; }
+#lock .fine { font-size: 12px; color: var(--faint); text-align: center; margin-top: 22px; line-height: 1.5; }
+
+/* ── header ── */
+header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 8px; flex-wrap: wrap; }
 .brand { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
 .brand em { font-style: normal; color: var(--faint); font-weight: 400; }
 .seg { display: inline-flex; background: rgba(120,120,128,.10); border-radius: 11px; padding: 2px; gap: 2px; }
@@ -35,20 +53,25 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .seg button.on { background: var(--card); color: var(--ink); font-weight: 590; box-shadow: 0 1px 3px rgba(0,0,0,.10), 0 0 1px rgba(0,0,0,.10); }
 .seg .n { color: var(--faint); margin-left: 6px; font-weight: 400; font-variant-numeric: tabular-nums; }
 
+.sync { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; font-size: 12px; color: var(--faint); }
+.sync .led { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.sync.busy .led { background: #ff9f0a; animation: blip 1s ease-in-out infinite; }
+.sync.err .led { background: var(--red); }
+.sync.err { color: var(--red); }
+
+/* ── hero ── */
 #hero.in { animation: rise .45s cubic-bezier(.2,.8,.3,1); }
 @keyframes rise { from { opacity: 0; transform: translateY(8px) scale(.995); } to { opacity: 1; transform: none; } }
 .hero {
   --u: #ff8a80; --ut: #c7584f; --glow0: rgba(0,0,0,0); --glow1: rgba(0,0,0,0); --tint: transparent;
   --ringdur: 3.2s; --tdur: 10s; --amp: 3px;
-  position: relative; background: var(--card); border-radius: var(--r); padding: 34px 26px 26px; min-height: 330px;
-  display: flex; flex-direction: column; justify-content: space-between;
+  position: relative; background: linear-gradient(var(--tint), var(--tint)), var(--card); border-radius: var(--r);
+  padding: 34px 26px 26px; min-height: 330px; display: flex; flex-direction: column; justify-content: space-between;
   box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 28px rgba(0,0,0,.05);
 }
 .hero::after { content: ""; position: absolute; inset: 0; border-radius: var(--r); border: 1.5px solid transparent; pointer-events: none; }
-.hero.edge { background: linear-gradient(var(--tint), var(--tint)), var(--card); }
 .hero.edge::after { border-color: var(--u); }
-.hero.edge .title { color: var(--ut); }
-.hero.edge .lvl .num, .hero.edge .lvl .txt { color: var(--ut); }
+.hero.edge .title, .hero.edge .lvl .num, .hero.edge .lvl .txt { color: var(--ut); }
 .hero.ring { animation: pulse var(--ringdur) cubic-bezier(.4,0,.2,1) infinite; }
 .hero.ring.tremor { animation: pulse var(--ringdur) cubic-bezier(.4,0,.2,1) infinite, tremor var(--tdur) ease-in-out 2s infinite; }
 @keyframes pulse {
@@ -80,7 +103,7 @@ body.calm .lvl .dot { animation: none; }
   border: 1px solid var(--hair); background: transparent; color: var(--sub); cursor: pointer; }
 .sep { width: 1px; height: 11px; background: var(--hair); }
 .muted { font-size: 12px; color: var(--sub); }
-.muted.hot { color: #ff3b30; }
+.muted.hot { color: var(--red); }
 .prog { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--sub); font-variant-numeric: tabular-nums; }
 .prog .track { width: 44px; height: 3px; border-radius: 2px; background: rgba(120,120,128,.20); overflow: hidden; }
 .prog .fill { height: 100%; background: var(--green); border-radius: 2px; transition: width .45s cubic-bezier(.2,.8,.3,1); }
@@ -113,13 +136,12 @@ body.calm .lvl .dot { animation: none; }
 .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); padding-inline: 28px; }
 .btn.tinted { background: rgba(120,120,128,.09); border-color: transparent; }
 .btn.quiet { background: transparent; border-color: transparent; color: var(--sub); }
-.btn.danger { color: var(--sub); }
 
 .empty { text-align: center; padding: 60px 16px; }
 .empty h2 { font-size: 26px; font-weight: 600; letter-spacing: -.025em; margin-bottom: 6px; }
 .empty p { color: var(--sub); max-width: 34ch; margin: 0 auto; }
-.empty .mark { width: 42px; height: 42px; margin: 0 auto 16px; border-radius: 50%; border: 1.5px solid var(--green); position: relative; }
-.empty .mark::after { content: ""; position: absolute; left: 13px; top: 11px; width: 11px; height: 19px; border: solid var(--green); border-width: 0 1.5px 1.5px 0; transform: rotate(43deg); }
+.empty .mk { width: 42px; height: 42px; margin: 0 auto 16px; border-radius: 50%; border: 1.5px solid var(--green); position: relative; }
+.empty .mk::after { content: ""; position: absolute; left: 13px; top: 11px; width: 11px; height: 19px; border: solid var(--green); border-width: 0 1.5px 1.5px 0; transform: rotate(43deg); }
 
 .timer { margin-top: 12px; background: var(--ink); color: #fff; border-radius: 18px; padding: 16px 22px;
   display: none; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
@@ -151,7 +173,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px;
   background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.22), 0 0 0 .5px rgba(0,0,0,.05); }
 .addbtn { width: 100%; }
 
-.bar { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 12px; flex-wrap: wrap; }
+.bar { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 10px; flex-wrap: wrap; }
 .link { font: inherit; font-size: 13px; font-weight: 500; color: var(--sub); background: none; border: none; cursor: pointer; padding: 6px 0; }
 .list { display: none; margin-top: 10px; background: var(--card); border-radius: 18px; overflow: hidden; }
 .list.on { display: block; }
@@ -167,11 +189,10 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px;
 .io.on { display: block; }
 .io h3 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
 .io p { font-size: 12.5px; color: var(--sub); margin-bottom: 12px; }
-.io textarea { font: inherit; font-size: 14px; width: 100%; min-height: 150px; padding: 12px; border: 1px solid var(--hair);
+.io textarea { font: inherit; font-size: 14px; width: 100%; min-height: 130px; padding: 12px; border: 1px solid var(--hair);
   border-radius: 12px; background: var(--bg); color: var(--ink); resize: vertical; }
 .io textarea:focus { outline: none; border-color: var(--sub); }
 .io .iorow { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-.io .note { font-size: 12px; color: var(--faint); margin-top: 10px; }
 
 #flash { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 99;
   background: rgba(245,245,247,.86); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
@@ -187,8 +208,18 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 </head>
 <body>
 <div id="flash"><div class="ring"></div></div>
-<div class="wrap">
 
+<div id="lock">
+  <div class="mark"><i></i><s></s></div>
+  <h1>One Thing</h1>
+  <p>Enter your passphrase to unlock your list.</p>
+  <input id="pw" type="password" placeholder="Passphrase" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+  <button id="unlock">Unlock</button>
+  <div class="warn" id="lockWarn"></div>
+  <div class="fine">The same passphrase on your laptop and phone opens the same list.<br>It never leaves this device. Nobody can reset it.</div>
+</div>
+
+<div class="wrap hide" id="app">
   <header>
     <div class="brand">One&nbsp;<em>Thing</em></div>
     <div class="seg">
@@ -196,6 +227,8 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       <button data-list="personal">Personal<span class="n" id="npersonal">0</span></button>
     </div>
   </header>
+
+  <div class="sync" id="sync"><span class="led"></span><span id="syncTxt">Connecting…</span></div>
 
   <div id="hero"></div>
 
@@ -226,122 +259,204 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 
   <div class="bar">
     <button class="link" id="toggleList">Show all</button>
-    <button class="link" id="toggleIO">Sync with Notes</button>
+    <button class="link" id="toggleIO">Import / export</button>
     <button class="link" id="toggleCalm">Calm mode: off</button>
   </div>
 
   <div class="list" id="list"></div>
 
   <div class="io" id="io">
-    <h3>Paste from Apple Notes</h3>
-    <p>Copy the whole “One Thing” note on your phone, paste it here, then Load. This replaces the list below.</p>
-    <textarea id="ioBox" placeholder="One Thing&#10;&#10;WORK&#10;8 · task » first step&#10;- subtask&#10;&#10;PERSONAL&#10;&#10;DONE"></textarea>
+    <h3>Import from a note</h3>
+    <p>Paste a list in the One Thing format. Tasks are added, nothing is deleted.</p>
+    <textarea id="ioBox" placeholder="WORK&#10;8 · task » first step&#10;- subtask&#10;&#10;PERSONAL&#10;7 · something"></textarea>
     <div class="iorow">
-      <button class="btn primary" id="ioLoad">Load into board</button>
-      <button class="btn tinted" id="ioCopy">Copy board out</button>
+      <button class="btn primary" id="ioLoad">Import</button>
+      <button class="btn tinted" id="ioCopy">Copy list out</button>
+      <button class="btn quiet" id="forget">Lock this device</button>
     </div>
-    <p class="note">This page cannot reach Apple Notes directly, so syncing is copy and paste. Copy out, then paste over the note to push changes back.</p>
   </div>
 
-  <footer>Saved on this device</footer>
+  <footer>Encrypted · synced across your devices</footer>
 </div>
 
 <script>
 (function () {
-  var KEY = 'onething_standalone_v1';
-  var state = load();
-  var current = 'work';
-  var newPrio = 5;
-  var refocusSub = false;
+  'use strict';
+
+  /* ══════════ config ══════════ */
+  var STORE = 'https://textdb.dev/api/data/';
+  var LOCAL = 'onething_sync_v1';       // { storeKey: {state, rev} }
+  var DEVKEY = 'onething_device_v1';    // { storeKey } remembered passphrase-derived id
+  var PULL_MS = 12000;
+
+  /* ══════════ crypto ══════════ */
+  var enc = new TextEncoder(), dec = new TextDecoder();
+  var cryptoKey = null, storeKey = null;
+
+  function b64(buf) { var b = new Uint8Array(buf), s = ''; for (var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s); }
+  function unb64(str) { var s = atob(str), b = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i); return b; }
+  function hex(buf) { return Array.prototype.map.call(new Uint8Array(buf), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
+
+  async function deriveAll(pass) {
+    // storage location derived from the passphrase, so nothing secret sits in the public repo
+    var idBits = await crypto.subtle.digest('SHA-256', enc.encode('onething|store|v1|' + pass));
+    var sk = 'ot1-' + hex(idBits).slice(0, 40);
+    // encryption key, separately derived and deliberately slow
+    var base = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
+    var ck = await crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt: enc.encode('onething|enc|v1|' + sk), iterations: 310000, hash: 'SHA-256' },
+      base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+    return { storeKey: sk, cryptoKey: ck };
+  }
+  async function encrypt(obj) {
+    var iv = crypto.getRandomValues(new Uint8Array(12));
+    var ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, cryptoKey, enc.encode(JSON.stringify(obj)));
+    return JSON.stringify({ v: 1, iv: b64(iv), d: b64(ct) });
+  }
+  async function decrypt(txt) {
+    var box = JSON.parse(txt);
+    if (!box || box.v !== 1) throw new Error('bad envelope');
+    var pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(box.iv) }, cryptoKey, unb64(box.d));
+    return JSON.parse(dec.decode(pt));
+  }
+
+  /* ══════════ state ══════════ */
+  // tasks keyed by id; every record carries updatedAt so two devices can merge
+  var state = { tasks: {}, rev: 0 };
+  var localOnly = {};   // skips / parked, never synced
+  var current = 'work', newPrio = 5, refocusSub = false;
   var timer = { id: null, left: 0, running: false };
+  var pushT = null, pulling = false, lastRemote = null, calm = false;
 
-  var LABEL = { 1:'Whenever',2:'Whenever',3:'Low',4:'Low',5:'Should do',6:'Should do',7:'Important',8:'Urgent',9:'Critical',10:'Do it now' };
-  var LISTCOLOR = { 1:'#a1a1a6',2:'#9a9aa0',3:'#93938f',4:'#a89768',5:'#c99a34',6:'#dd9020',7:'#ef7a19',8:'#f8622c',9:'#ff4a35',10:'#ff3b30' };
-  function clampP(p) { p = parseInt(p, 10); if (isNaN(p)) p = 5; return Math.min(10, Math.max(1, p)); }
-  function tone(p) {
-    p = clampP(p);
-    var t = (p - 1) / 9;
-    var rgb = 255 + ',' + Math.round(138 - t * 79) + ',' + Math.round(128 - t * 80);
-    return {
-      color: 'rgb(' + rgb + ')',
-      glow0: 'rgba(' + rgb + ',' + (0.16 + t * 0.22).toFixed(3) + ')',
-      glow1: 'rgba(' + rgb + ',0)',
-      tint: 'rgba(' + rgb + ',' + (0.02 + t * 0.05).toFixed(3) + ')',
-      text: 'rgb(' + Math.round(199 + t * 16) + ',' + Math.round(88 - t * 88) + ',' + Math.round(79 - t * 58) + ')',
-      ringdur: (5.2 - t * 3.0).toFixed(2) + 's',
-      tdur: (18 - t * 13).toFixed(1) + 's',
-      amp: (1.6 + t * 3.4).toFixed(1) + 'px'
-    };
-  }
-
-  function load() {
-    try { var d = JSON.parse(localStorage.getItem(KEY)); if (d && d.tasks) return d; } catch (e) {}
-    return { tasks: [], done: [], calm: false };
-  }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
-  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-  function days(ts) { return Math.floor((Date.now() - ts) / 86400000); }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+  function now() { return Date.now(); }
+  function days(ts) { return Math.floor((now() - ts) / 86400000); }
   function escH(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' })[c]; }); }
 
-  /* ── import / export in the Apple Notes format ── */
-  var SUBMARK = /^[-–—*•▪·]\s+/, DONEMARK = /^(✓|✔|\[x\]|\[X\])\s*/;
-  function importText(text) {
-    var lines = String(text).split(/\r?\n/).map(function (x) { return x.replace(/ /g, ' ').replace(/^\t+/, '- ').trim(); });
-    var out = [], done = [], section = null, last = null;
-    lines.forEach(function (raw, i) {
-      if (!raw) return;
-      var isSub = SUBMARK.test(raw);
-      var line = raw.replace(SUBMARK, '').trim();
-      if (!line) return;
-      var up = line.toUpperCase().replace(/[:：]$/, '');
-      if (i === 0 && up === 'ONE THING') return;
-      if (!isSub) {
-        if (up === 'WORK' || up === 'PRÁCE' || up === 'PRACE') { section = 'work'; last = null; return; }
-        if (up === 'PERSONAL' || up === 'OSOBNÍ' || up === 'OSOBNI') { section = 'personal'; last = null; return; }
-        if (up === 'DONE' || up === 'HOTOVO') { section = 'done'; last = null; return; }
-      }
-      if (!section) return;
-      if (section === 'done') { done.push(line); return; }
-      if (isSub && last) {
-        var sd = DONEMARK.test(line), st = line.replace(DONEMARK, '').trim();
-        if (st) last.subs.push({ text: st, done: sd });
-        return;
-      }
-      var mm = line.match(/^(\d{1,2})\s*[·•.\-–—|:)]\s*(.+)$/);
-      var prio = mm ? clampP(mm[1]) : 5;
-      var rest = mm ? mm[2] : line;
-      var parts = rest.split(/\s*(?:»|>>|→)\s*/);
-      var title = (parts[0] || '').trim();
-      if (!title) return;
-      last = { id: uid(), title: title, step: (parts[1] || '').trim(), priority: prio, list: section,
-               created: Date.now(), skips: 0, parked: false, subs: [] };
-      out.push(last);
-    });
-    return { tasks: out, done: done };
-  }
-  function exportText() {
-    var out = ['One Thing', ''];
-    ['work', 'personal'].forEach(function (list) {
-      out.push(list === 'work' ? 'WORK' : 'PERSONAL');
-      open(list).forEach(function (t) {
-        out.push(t.priority + ' · ' + t.title + (t.step ? ' » ' + t.step : ''));
-        (t.subs || []).forEach(function (s) { out.push('- ' + (s.done ? '✓ ' : '') + s.text); });
-      });
-      out.push('');
-    });
-    out.push('DONE');
-    (state.done || []).slice(0, 40).forEach(function (l) { out.push(l); });
-    return out.join('\n');
+  var LABEL = { 1:'Whenever',2:'Whenever',3:'Low',4:'Low',5:'Should do',6:'Should do',7:'Important',8:'Urgent',9:'Critical',10:'Do it now' };
+  var LISTC = { 1:'#a1a1a6',2:'#9a9aa0',3:'#93938f',4:'#a89768',5:'#c99a34',6:'#dd9020',7:'#ef7a19',8:'#f8622c',9:'#ff4a35',10:'#ff3b30' };
+  function clampP(p) { p = parseInt(p, 10); if (isNaN(p)) p = 5; return Math.min(10, Math.max(1, p)); }
+  function tone(p) {
+    p = clampP(p); var t = (p - 1) / 9;
+    var rgb = 255 + ',' + Math.round(138 - t * 79) + ',' + Math.round(128 - t * 80);
+    return { color: 'rgb(' + rgb + ')', glow0: 'rgba(' + rgb + ',' + (0.16 + t * 0.22).toFixed(3) + ')',
+      glow1: 'rgba(' + rgb + ',0)', tint: 'rgba(' + rgb + ',' + (0.02 + t * 0.05).toFixed(3) + ')',
+      text: 'rgb(' + Math.round(199 + t * 16) + ',' + Math.round(88 - t * 88) + ',' + Math.round(79 - t * 58) + ')',
+      ringdur: (5.2 - t * 3.0).toFixed(2) + 's', tdur: (18 - t * 13).toFixed(1) + 's', amp: (1.6 + t * 3.4).toFixed(1) + 'px' };
   }
 
-  function open(list) {
-    return state.tasks.filter(function (t) { return t.list === list; })
+  /* ══════════ local persistence ══════════ */
+  function saveLocal() {
+    try {
+      localStorage.setItem(LOCAL + '|' + storeKey, JSON.stringify(state));
+      localStorage.setItem('onething_localonly|' + storeKey, JSON.stringify(localOnly));
+      localStorage.setItem('onething_calm', calm ? '1' : '0');
+    } catch (e) {}
+  }
+  function loadLocal() {
+    try {
+      var s = JSON.parse(localStorage.getItem(LOCAL + '|' + storeKey));
+      if (s && s.tasks) state = s;
+      var l = JSON.parse(localStorage.getItem('onething_localonly|' + storeKey));
+      if (l) localOnly = l;
+      calm = localStorage.getItem('onething_calm') === '1';
+    } catch (e) {}
+  }
+
+  /* ══════════ merge ══════════ */
+  function merge(a, b) {
+    var out = { tasks: {}, rev: Math.max(a.rev || 0, b.rev || 0) };
+    var ids = {};
+    Object.keys(a.tasks || {}).forEach(function (k) { ids[k] = 1; });
+    Object.keys(b.tasks || {}).forEach(function (k) { ids[k] = 1; });
+    Object.keys(ids).forEach(function (id) {
+      var x = (a.tasks || {})[id], y = (b.tasks || {})[id];
+      if (!x) { out.tasks[id] = y; return; }
+      if (!y) { out.tasks[id] = x; return; }
+      out.tasks[id] = (y.updatedAt || 0) > (x.updatedAt || 0) ? y : x;
+    });
+    // drop tombstones and finished items after 30 days
+    var cut = now() - 30 * 86400000;
+    Object.keys(out.tasks).forEach(function (id) {
+      var t = out.tasks[id];
+      if ((t.deleted || t.done) && (t.updatedAt || 0) < cut) delete out.tasks[id];
+    });
+    return out;
+  }
+
+  /* ══════════ network ══════════ */
+  function setSync(kind, txt) {
+    var el = document.getElementById('sync');
+    el.className = 'sync' + (kind === 'busy' ? ' busy' : kind === 'err' ? ' err' : '');
+    document.getElementById('syncTxt').textContent = txt;
+  }
+  function stamp() { var d = new Date(); return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); }
+
+  async function pull(quiet) {
+    if (pulling) return;
+    pulling = true;
+    if (!quiet) setSync('busy', 'Syncing…');
+    try {
+      var r = await fetch(STORE + storeKey, { cache: 'no-store' });
+      var txt = (await r.text()).trim();
+      if (txt) {
+        var remote = await decrypt(txt);
+        var before = JSON.stringify(state.tasks);
+        state = merge(state, remote);
+        lastRemote = txt;
+        if (JSON.stringify(state.tasks) !== before) { saveLocal(); render(); }
+      }
+      setSync('ok', 'Synced · ' + stamp());
+    } catch (e) {
+      if (e && /operation-specific reason|decrypt/i.test(String(e.message))) setSync('err', 'Wrong passphrase for this list');
+      else setSync('err', 'Offline · changes saved here');
+    } finally { pulling = false; }
+  }
+
+  function schedulePush() {
+    clearTimeout(pushT);
+    pushT = setTimeout(push, 700);
+  }
+  async function push() {
+    setSync('busy', 'Saving…');
+    try {
+      // read-modify-write so the other device is never clobbered
+      try {
+        var r = await fetch(STORE + storeKey, { cache: 'no-store' });
+        var txt = (await r.text()).trim();
+        if (txt && txt !== lastRemote) state = merge(state, await decrypt(txt));
+      } catch (e) { /* first write, or unreadable: fall through and write ours */ }
+      state.rev = (state.rev || 0) + 1;
+      var body = await encrypt(state);
+      var res = await fetch(STORE + storeKey, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: body });
+      if (!res.ok) throw new Error('http ' + res.status);
+      lastRemote = body;
+      saveLocal(); render();
+      setSync('ok', 'Synced · ' + stamp());
+    } catch (e) {
+      saveLocal();
+      setSync('err', 'Offline · changes saved here');
+    }
+  }
+
+  function touch(t) { t.updatedAt = now(); saveLocal(); render(); schedulePush(); }
+
+  /* ══════════ selectors ══════════ */
+  function live(list) {
+    return Object.keys(state.tasks).map(function (k) { return state.tasks[k]; })
+      .filter(function (t) { return t && !t.deleted && !t.done && t.list === list; })
       .sort(function (a, b) { return b.priority !== a.priority ? b.priority - a.priority : a.created - b.created; });
   }
-  function top(list) {
-    var o = open(list); if (!o.length) return null;
-    var fresh = o.filter(function (t) { return !t.parked; });
+  function topOf(list) {
+    var o = live(list); if (!o.length) return null;
+    var fresh = o.filter(function (t) { return !(localOnly[t.id] || {}).parked; });
     return (fresh.length ? fresh : o)[0];
+  }
+  function lo(id) { if (!localOnly[id]) localOnly[id] = { skips: 0, parked: false }; return localOnly[id]; }
+  function doneList() {
+    return Object.keys(state.tasks).map(function (k) { return state.tasks[k]; })
+      .filter(function (t) { return t && t.done && !t.deleted; })
+      .sort(function (a, b) { return (b.completedAt || 0) - (a.completedAt || 0); });
   }
   function ageText(d) {
     if (d <= 0) return 'Added today';
@@ -352,18 +467,20 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     return d + ' days · make it smaller';
   }
 
+  /* ══════════ render ══════════ */
   function renderHero() {
     var el = document.getElementById('hero');
     el.classList.remove('in'); void el.offsetWidth; el.classList.add('in');
-    var t = top(current);
+    var t = topOf(current);
     if (!t) {
-      el.innerHTML = '<div class="hero"><div class="empty"><div class="mark"></div><h2>Nothing left.</h2><p>' +
+      el.innerHTML = '<div class="hero"><div class="empty"><div class="mk"></div><h2>Nothing left.</h2><p>' +
         (current === 'work' ? 'Work is clear.' : 'Personal is clear.') + '</p></div></div>';
       return;
     }
     var k = tone(t.priority), d = days(t.created), hot = d >= 7;
     var subs = t.subs || [], doneN = subs.filter(function (s) { return s.done; }).length;
     var nextI = subs.findIndex(function (s) { return !s.done; });
+    var m = lo(t.id);
     var vars = '--u:' + k.color + ';--ut:' + k.text + ';--glow0:' + k.glow0 + ';--glow1:' + k.glow1 +
                ';--tint:' + k.tint + ';--ringdur:' + k.ringdur + ';--tdur:' + k.tdur + ';--amp:' + k.amp + ';';
     var subHtml = subs.map(function (s, i) {
@@ -378,7 +495,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
             '<span class="step2"><button data-do="down">−</button><button data-do="up">+</button></span>' +
             '<span class="sep"></span><span class="muted' + (hot ? ' hot' : '') + '">' + ageText(d) + '</span>' +
             (subs.length ? '<span class="sep"></span><span class="prog"><span class="track"><span class="fill" style="width:' + Math.round(doneN / subs.length * 100) + '%"></span></span>' + doneN + '/' + subs.length + '</span>' : '') +
-            (t.skips > 1 ? '<span class="sep"></span><span class="muted hot">skipped ' + t.skips + '×</span>' : '') +
+            (m.skips > 1 ? '<span class="sep"></span><span class="muted hot">skipped ' + m.skips + '×</span>' : '') +
           '</div>' +
           '<div class="title">' + escH(t.title) + '</div>' +
           (t.step ? '<div class="first"><span class="k">Start by</span><span>' + escH(t.step) + '</span></div>' : '') +
@@ -390,7 +507,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
           '<button class="btn primary" data-do="done">Done</button>' +
           '<button class="btn tinted" data-do="timer">15 min</button>' +
           '<button class="btn quiet" data-do="skip">Not now</button>' +
-          '<button class="btn quiet danger" data-do="drop">Delete</button>' +
+          '<button class="btn quiet" data-do="drop">Delete</button>' +
         '</div>' +
       '</div>';
     var sa = document.getElementById('subAdd');
@@ -400,151 +517,128 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
         e.preventDefault();
         var v = sa.value.trim(); if (!v) return;
         sa.value = ''; refocusSub = true;
-        t.subs = t.subs || []; t.subs.push({ text: v, done: false }); save(); render();
+        t.subs = t.subs || []; t.subs.push({ text: v, done: false }); touch(t);
       });
       if (refocusSub) { refocusSub = false; sa.focus(); }
     }
   }
 
   function renderStats() {
-    var today = new Date().toISOString().slice(0, 10);
-    var wk = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
-    var dates = (state.done || []).map(function (l) { var m = l.match(/(\d{4}-\d{2}-\d{2})/); return m ? m[1] : null; }).filter(Boolean);
-    var o = open(current);
-    document.getElementById('stDone').textContent = dates.filter(function (x) { return x === today; }).length;
-    document.getElementById('stWeek').textContent = dates.filter(function (x) { return x >= wk; }).length;
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var wk = now() - 7 * 86400000;
+    var dn = doneList();
+    var o = live(current);
+    document.getElementById('stDone').textContent = dn.filter(function (t) { return (t.completedAt || 0) >= today.getTime(); }).length;
+    document.getElementById('stWeek').textContent = dn.filter(function (t) { return (t.completedAt || 0) >= wk; }).length;
     document.getElementById('stOpen').textContent = o.length;
     document.getElementById('stOld').textContent = o.length ? Math.max.apply(null, o.map(function (t) { return days(t.created); })) : 0;
-    document.getElementById('nwork').textContent = open('work').length;
-    document.getElementById('npersonal').textContent = open('personal').length;
+    document.getElementById('nwork').textContent = live('work').length;
+    document.getElementById('npersonal').textContent = live('personal').length;
   }
 
   function renderList() {
     var el = document.getElementById('list');
-    var html = open(current).map(function (t) {
+    var html = live(current).map(function (t) {
       var d = days(t.created), subs = t.subs || [], doneN = subs.filter(function (s) { return s.done; }).length;
-      return '<div class="row"><div class="d" style="background:' + LISTCOLOR[t.priority] + '"></div>' +
+      var m = lo(t.id);
+      return '<div class="row"><div class="d" style="background:' + LISTC[t.priority] + '"></div>' +
         '<div class="t">' + escH(t.title) + '<small>' + t.priority + ' · ' + LABEL[t.priority] + ' · ' + (d <= 0 ? 'today' : d + 'd') +
-        (subs.length ? ' · ' + doneN + '/' + subs.length + ' steps' : '') + '</small></div>' +
+        (subs.length ? ' · ' + doneN + '/' + subs.length + ' steps' : '') +
+        (m.skips > 1 ? ' · skipped ' + m.skips + '×' : '') + '</small></div>' +
         '<button data-raise="' + t.id + '">Raise</button><button data-done="' + t.id + '">Done</button></div>';
     }).join('');
-    var recent = (state.done || []).slice(0, 6).map(function (l) {
-      return '<div class="row dn"><div class="d" style="background:#c7c7cc"></div><div class="t">' + escH(l.replace(/^✓\s*/, '')) + '</div></div>';
+    var recent = doneList().slice(0, 6).map(function (t) {
+      return '<div class="row dn"><div class="d" style="background:#c7c7cc"></div><div class="t">' + escH(t.title) + '</div></div>';
     }).join('');
     el.innerHTML = (html || '<div class="row"><div class="t" style="color:#c7c7cc">Nothing here yet.</div></div>') + recent;
   }
 
   function render() { renderHero(); renderStats(); renderList(); }
 
+  /* ══════════ actions ══════════ */
   function flash() {
     var f = document.getElementById('flash');
     f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
     setTimeout(function () { f.classList.remove('on'); }, 640);
   }
   function complete(id) {
-    var i = state.tasks.findIndex(function (t) { return t.id === id; }); if (i < 0) return;
-    var t = state.tasks[i];
-    state.tasks.splice(i, 1);
-    state.done = state.done || [];
-    state.done.unshift('✓ ' + new Date().toISOString().slice(0, 10) + ' · ' + t.title);
-    state.tasks.filter(function (x) { return x.list === t.list; }).forEach(function (x) { x.parked = false; });
-    save(); flash(); stopTimer(); render();
+    var t = state.tasks[id]; if (!t) return;
+    t.done = true; t.completedAt = now();
+    Object.keys(localOnly).forEach(function (k) { if (state.tasks[k] && state.tasks[k].list === t.list) localOnly[k].parked = false; });
+    flash(); stopTimer(); touch(t);
+  }
+  function drop(id) { var t = state.tasks[id]; if (!t) return; t.deleted = true; touch(t); }
+  function nudge(id, delta) {
+    var t = state.tasks[id]; if (!t) return;
+    t.priority = Math.min(10, Math.max(1, t.priority + delta));
+    lo(id).parked = false; touch(t);
   }
   function skip(id) {
-    var t = state.tasks.find(function (x) { return x.id === id; }); if (!t) return;
-    t.skips = (t.skips || 0) + 1;
-    var others = open(t.list).filter(function (x) { return !x.parked && x.id !== id; });
-    if (!others.length) state.tasks.filter(function (x) { return x.list === t.list; }).forEach(function (x) { x.parked = false; });
-    t.parked = true; save(); render();
+    var t = state.tasks[id]; if (!t) return;
+    var m = lo(id); m.skips = (m.skips || 0) + 1;
+    var others = live(t.list).filter(function (x) { return x.id !== id && !(localOnly[x.id] || {}).parked; });
+    if (!others.length) live(t.list).forEach(function (x) { lo(x.id).parked = false; });
+    m.parked = true; saveLocal(); render();
+  }
+  function addTask(title, step, prio, list, subs) {
+    var id = uid();
+    state.tasks[id] = { id: id, title: title, step: step || '', priority: clampP(prio), list: list,
+      subs: subs || [], created: now(), done: false, completedAt: null, deleted: false, updatedAt: now() };
+    return state.tasks[id];
   }
 
-  document.querySelectorAll('.seg button').forEach(function (b) {
-    b.addEventListener('click', function () {
-      document.querySelectorAll('.seg button').forEach(function (x) { x.classList.remove('on'); });
-      b.classList.add('on'); current = b.dataset.list;
-      document.getElementById('addWhere').textContent = current; render();
+  /* ══════════ import / export ══════════ */
+  var SUBMARK = /^[-–—*•▪·]\s+/, DONEMARK = /^(✓|✔|\[x\]|\[X\])\s*/;
+  function importText(text) {
+    var lines = String(text).split(/\r?\n/).map(function (x) { return x.replace(/ /g, ' ').replace(/^\t+/, '- ').replace(/\s+$/, ''); });
+    var section = null, last = null, added = 0;
+    lines.forEach(function (raw, i) {
+      var line0 = raw.trim(); if (!line0) return;
+      var isSub = SUBMARK.test(line0);
+      var line = line0.replace(SUBMARK, '').trim(); if (!line) return;
+      var up = line.toUpperCase().replace(/[:：]$/, '');
+      if (i === 0 && up === 'ONE THING') return;
+      if (!isSub) {
+        if (up === 'WORK' || up === 'PRÁCE' || up === 'PRACE') { section = 'work'; last = null; return; }
+        if (up === 'PERSONAL' || up === 'OSOBNÍ' || up === 'OSOBNI') { section = 'personal'; last = null; return; }
+        if (up === 'DONE' || up === 'HOTOVO') { section = 'done'; last = null; return; }
+      }
+      if (!section || section === 'done') return;
+      if (isSub && last) {
+        var sd = DONEMARK.test(line), st = line.replace(DONEMARK, '').trim();
+        if (st) { last.subs.push({ text: st, done: sd }); last.updatedAt = now(); }
+        return;
+      }
+      var mm = line.match(/^(\d{1,2})\s*[·•.\-–—|:)]\s*(.+)$/);
+      var prio = mm ? clampP(mm[1]) : 5;
+      var rest = mm ? mm[2] : line;
+      var parts = rest.split(/\s*(?:»|>>|→)\s*/);
+      var title = (parts[0] || '').trim(); if (!title) return;
+      var dup = live(section).find(function (x) { return x.title.toLowerCase() === title.toLowerCase(); });
+      if (dup) { last = dup; return; }
+      last = addTask(title, (parts[1] || '').trim(), prio, section, []);
+      added++;
     });
-  });
-
-  document.getElementById('hero').addEventListener('click', function (e) {
-    var t = top(current);
-    var s = e.target.closest('[data-sub]');
-    if (s && t) { var i = parseInt(s.dataset.sub, 10); t.subs[i].done = !t.subs[i].done; save(); render(); return; }
-    var b = e.target.closest('[data-do]'); if (!b || !t) return;
-    var a = b.dataset.do;
-    if (a === 'done') complete(t.id);
-    else if (a === 'skip') skip(t.id);
-    else if (a === 'up') { t.priority = Math.min(10, t.priority + 1); t.parked = false; save(); render(); }
-    else if (a === 'down') { t.priority = Math.max(1, t.priority - 1); save(); render(); }
-    else if (a === 'drop') { if (confirm('Delete “' + t.title + '”?')) { state.tasks = state.tasks.filter(function (x) { return x.id !== t.id; }); save(); render(); } }
-    else if (a === 'timer') startTimer(15);
-  });
-
-  document.getElementById('list').addEventListener('click', function (e) {
-    var b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.done) complete(b.dataset.done);
-    else if (b.dataset.raise) {
-      var t = state.tasks.find(function (x) { return x.id === b.dataset.raise; });
-      if (t) { t.priority = Math.min(10, t.priority + 2); t.parked = false; save(); render(); }
-    }
-  });
-
-  var range = document.getElementById('urgRange');
-  function paintUrg() {
-    var p = clampP(range.value); newPrio = p;
-    document.getElementById('urgWrap').style.setProperty('--u', LISTCOLOR[p]);
-    document.getElementById('urgNum').textContent = p;
-    document.getElementById('urgLbl').textContent = LABEL[p];
+    return added;
   }
-  range.addEventListener('input', paintUrg);
-
-  function addTask() {
-    var ti = document.getElementById('fTitle');
-    var title = ti.value.trim(); if (!title) { ti.focus(); return; }
-    state.tasks.push({ id: uid(), title: title, step: document.getElementById('fStep').value.trim(),
-      priority: newPrio, list: current, created: Date.now(), skips: 0, parked: false, subs: [] });
-    ti.value = ''; document.getElementById('fStep').value = '';
-    save(); render();
-  }
-  document.getElementById('addBtn').addEventListener('click', addTask);
-  ['fTitle', 'fStep'].forEach(function (id) {
-    document.getElementById(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addTask(); } });
-  });
-
-  document.getElementById('toggleList').addEventListener('click', function () {
-    var l = document.getElementById('list'); l.classList.toggle('on');
-    this.textContent = l.classList.contains('on') ? 'Hide all' : 'Show all';
-  });
-  document.getElementById('toggleIO').addEventListener('click', function () {
-    document.getElementById('io').classList.toggle('on');
-  });
-  document.getElementById('toggleCalm').addEventListener('click', function () {
-    state.calm = !state.calm; save(); applyCalm();
-  });
-  function applyCalm() {
-    document.body.classList.toggle('calm', !!state.calm);
-    document.getElementById('toggleCalm').textContent = 'Calm mode: ' + (state.calm ? 'on' : 'off');
+  function exportText() {
+    var out = ['One Thing', ''];
+    ['work', 'personal'].forEach(function (list) {
+      out.push(list === 'work' ? 'WORK' : 'PERSONAL');
+      live(list).forEach(function (t) {
+        out.push(t.priority + ' · ' + t.title + (t.step ? ' » ' + t.step : ''));
+        (t.subs || []).forEach(function (s) { out.push('- ' + (s.done ? '✓ ' : '') + s.text); });
+      });
+      out.push('');
+    });
+    out.push('DONE');
+    doneList().slice(0, 30).forEach(function (t) {
+      out.push('✓ ' + new Date(t.completedAt || now()).toISOString().slice(0, 10) + ' · ' + t.title);
+    });
+    return out.join('\n');
   }
 
-  document.getElementById('ioLoad').addEventListener('click', function () {
-    var txt = document.getElementById('ioBox').value;
-    if (!txt.trim()) return;
-    if (state.tasks.length && !confirm('Replace the ' + state.tasks.length + ' tasks on this device?')) return;
-    var r = importText(txt);
-    state.tasks = r.tasks; state.done = r.done;
-    save(); render();
-    document.getElementById('io').classList.remove('on');
-  });
-  document.getElementById('ioCopy').addEventListener('click', function () {
-    var txt = exportText();
-    document.getElementById('ioBox').value = txt;
-    var b = this;
-    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () {
-      b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy board out'; }, 1600);
-    }).catch(function () { b.textContent = 'Select and copy above'; });
-    else b.textContent = 'Select and copy above';
-  });
-
+  /* ══════════ timer ══════════ */
   function fmt(s) { var m = Math.floor(s / 60), r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; }
   function startTimer(mins) {
     stopTimer(); timer.left = mins * 60; timer.running = true;
@@ -567,13 +661,151 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     timer.id = null; timer.running = false;
     document.getElementById('timer').classList.remove('on', 'done');
   }
-  document.getElementById('tstop').addEventListener('click', stopTimer);
-  document.getElementById('tplus').addEventListener('click', function () {
-    if (!timer.running) { startTimer(5); return; }
-    timer.left += 300; document.getElementById('clock').textContent = fmt(timer.left);
-  });
 
-  applyCalm(); paintUrg(); render();
+  /* ══════════ wiring ══════════ */
+  function wire() {
+    document.querySelectorAll('.seg button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        document.querySelectorAll('.seg button').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on'); current = b.dataset.list;
+        document.getElementById('addWhere').textContent = current; render();
+      });
+    });
+
+    document.getElementById('hero').addEventListener('click', function (e) {
+      var t = topOf(current); if (!t) return;
+      var s = e.target.closest('[data-sub]');
+      if (s) { var i = parseInt(s.dataset.sub, 10); t.subs[i].done = !t.subs[i].done; touch(t); return; }
+      var b = e.target.closest('[data-do]'); if (!b) return;
+      var a = b.dataset.do;
+      if (a === 'done') complete(t.id);
+      else if (a === 'skip') skip(t.id);
+      else if (a === 'up') nudge(t.id, 1);
+      else if (a === 'down') nudge(t.id, -1);
+      else if (a === 'drop') { if (confirm('Delete “' + t.title + '”?')) drop(t.id); }
+      else if (a === 'timer') startTimer(15);
+    });
+
+    document.getElementById('list').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.done) complete(b.dataset.done);
+      else if (b.dataset.raise) nudge(b.dataset.raise, 2);
+    });
+
+    var range = document.getElementById('urgRange');
+    function paintUrg() {
+      var p = clampP(range.value); newPrio = p;
+      document.getElementById('urgWrap').style.setProperty('--u', LISTC[p]);
+      document.getElementById('urgNum').textContent = p;
+      document.getElementById('urgLbl').textContent = LABEL[p];
+    }
+    range.addEventListener('input', paintUrg); paintUrg();
+
+    function submitTask() {
+      var ti = document.getElementById('fTitle');
+      var title = ti.value.trim(); if (!title) { ti.focus(); return; }
+      addTask(title, document.getElementById('fStep').value.trim(), newPrio, current, []);
+      ti.value = ''; document.getElementById('fStep').value = '';
+      saveLocal(); render(); schedulePush();
+    }
+    document.getElementById('addBtn').addEventListener('click', submitTask);
+    ['fTitle', 'fStep'].forEach(function (id) {
+      document.getElementById(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submitTask(); } });
+    });
+
+    document.getElementById('toggleList').addEventListener('click', function () {
+      var l = document.getElementById('list'); l.classList.toggle('on');
+      this.textContent = l.classList.contains('on') ? 'Hide all' : 'Show all';
+    });
+    document.getElementById('toggleIO').addEventListener('click', function () { document.getElementById('io').classList.toggle('on'); });
+    document.getElementById('toggleCalm').addEventListener('click', function () { calm = !calm; saveLocal(); applyCalm(); });
+
+    document.getElementById('ioLoad').addEventListener('click', function () {
+      var n = importText(document.getElementById('ioBox').value);
+      document.getElementById('ioBox').value = '';
+      saveLocal(); render(); schedulePush();
+      this.textContent = n ? 'Added ' + n : 'Nothing new';
+      var b = this; setTimeout(function () { b.textContent = 'Import'; }, 1800);
+    });
+    document.getElementById('ioCopy').addEventListener('click', function () {
+      var txt = exportText();
+      document.getElementById('ioBox').value = txt;
+      var b = this;
+      if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () {
+        b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy list out'; }, 1600);
+      }).catch(function () {});
+    });
+    document.getElementById('forget').addEventListener('click', function () {
+      if (!confirm('Lock this device? Your list stays synced, you just need the passphrase again.')) return;
+      localStorage.removeItem(DEVKEY);
+      location.reload();
+    });
+
+    document.getElementById('tstop').addEventListener('click', stopTimer);
+    document.getElementById('tplus').addEventListener('click', function () {
+      if (!timer.running) { startTimer(5); return; }
+      timer.left += 300; document.getElementById('clock').textContent = fmt(timer.left);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      var tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea') return;
+      var t = topOf(current), k = e.key.toLowerCase();
+      if (k === 'n') { e.preventDefault(); document.getElementById('fTitle').focus(); return; }
+      if (!t) return;
+      if (k === 'd') complete(t.id);
+      else if (k === 's') skip(t.id);
+      else if (k === 't') startTimer(15);
+      else if (k === 'b') { e.preventDefault(); var sa = document.getElementById('subAdd'); if (sa) sa.focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); nudge(t.id, 1); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); nudge(t.id, -1); }
+    });
+
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) pull(true); });
+    window.addEventListener('focus', function () { pull(true); });
+    setInterval(function () { if (!document.hidden) pull(true); }, PULL_MS);
+  }
+
+  function applyCalm() {
+    document.body.classList.toggle('calm', !!calm);
+    document.getElementById('toggleCalm').textContent = 'Calm mode: ' + (calm ? 'on' : 'off');
+  }
+
+  /* ══════════ unlock ══════════ */
+  async function start(pass, remember) {
+    var d = await deriveAll(pass);
+    storeKey = d.storeKey; cryptoKey = d.cryptoKey;
+    if (remember) { try { localStorage.setItem(DEVKEY, pass); } catch (e) {} }
+    loadLocal();
+    document.getElementById('lock').classList.add('hide');
+    document.getElementById('app').classList.remove('hide');
+    wire(); applyCalm(); render();
+    await pull();
+  }
+
+  var pw = document.getElementById('pw'), warn = document.getElementById('lockWarn');
+  async function tryUnlock() {
+    var v = pw.value;
+    if (v.length < 8) { warn.textContent = 'Use at least 8 characters. This is what protects your list.'; return; }
+    warn.textContent = '';
+    document.getElementById('unlock').disabled = true;
+    document.getElementById('unlock').textContent = 'Unlocking…';
+    try { await start(v, true); }
+    catch (e) {
+      warn.textContent = 'Could not unlock: ' + (e && e.message ? e.message : e);
+      document.getElementById('unlock').disabled = false;
+      document.getElementById('unlock').textContent = 'Unlock';
+    }
+  }
+  document.getElementById('unlock').addEventListener('click', tryUnlock);
+  pw.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryUnlock(); });
+
+  // a device that has been unlocked before goes straight in
+  try {
+    var saved = localStorage.getItem(DEVKEY);
+    if (saved) start(saved, false);
+    else pw.focus();
+  } catch (e) { pw.focus(); }
 })();
 </script>
 </body>
