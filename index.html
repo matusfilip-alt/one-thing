@@ -53,6 +53,23 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .seg button.on { background: var(--card); color: var(--ink); font-weight: 590; box-shadow: 0 1px 3px rgba(0,0,0,.10), 0 0 1px rgba(0,0,0,.10); }
 .seg .n { color: var(--faint); margin-left: 6px; font-weight: 400; font-variant-numeric: tabular-nums; }
 
+/* areas */
+.areas { display: flex; gap: 6px; flex-wrap: wrap; margin: 2px 0 14px; }
+.chip {
+  font: inherit; font-size: 12.5px; font-weight: 500; padding: 6px 13px; border-radius: 980px;
+  border: 1px solid var(--hair); background: var(--card); color: var(--sub); cursor: pointer;
+  transition: all .2s cubic-bezier(.2,.8,.3,1); white-space: nowrap;
+}
+.chip:hover { border-color: var(--faint); color: var(--ink); }
+.chip.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.chip .c { opacity: .5; margin-left: 5px; font-variant-numeric: tabular-nums; }
+.chip.add { border-style: dashed; color: var(--faint); }
+.areapick { display: flex; gap: 6px; flex-wrap: wrap; padding: 4px 0 14px; align-items: center; }
+.areapick .lab { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--faint); margin-right: 4px; }
+.abadge { font-size: 11px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--sub);
+  background: rgba(120,120,128,.10); padding: 3px 9px; border-radius: 980px; cursor: pointer; }
+.abadge:hover { color: var(--ink); }
+
 .sync { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; font-size: 12px; color: var(--faint); }
 .sync .led { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
 .sync.busy .led { background: #ff9f0a; animation: blip 1s ease-in-out infinite; }
@@ -171,8 +188,21 @@ body.calm .lvl .dot { animation: none; }
 .timer.on { display: flex; }
 .timer .lbl { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; opacity: .55; font-weight: 500; }
 .clock { font-size: 36px; font-weight: 500; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1.1; }
-.timer button { font: inherit; font-size: 13px; padding: 9px 15px; border-radius: 980px; border: 1px solid rgba(255,255,255,.22); background: transparent; color: #fff; }
-.timer.done { background: var(--green); }
+.timer button { font: inherit; font-size: 13px; padding: 9px 15px; border-radius: 980px; border: 1px solid rgba(255,255,255,.22); background: transparent; color: #fff; cursor: pointer; }
+.timer button:hover { background: rgba(255,255,255,.12); }
+.timer .ctl { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+.timer input.mins { font: inherit; font-size: 13px; width: 62px; padding: 9px 10px; border-radius: 980px;
+  border: 1px solid rgba(255,255,255,.22); background: transparent; color: #fff; text-align: center; }
+.timer input.mins:focus { outline: none; border-color: rgba(255,255,255,.5); }
+.timer input.mins::placeholder { color: rgba(255,255,255,.4); }
+.timer.over { background: #1d1d1f; }
+.timer.over .clock { color: #9ff0bd; }
+
+/* timer presets on the card */
+.tpick { display: inline-flex; gap: 6px; align-items: center; }
+.tpick button.mini { font: inherit; font-size: 12px; font-weight: 500; padding: 8px 11px; border-radius: 980px;
+  border: 1px solid var(--hair); background: transparent; color: var(--sub); cursor: pointer; }
+.tpick button.mini:hover { color: var(--ink); border-color: var(--faint); }
 
 .stats { display: flex; margin-top: 20px; gap: 1px; background: var(--hair); border-radius: 16px; overflow: hidden; flex-wrap: wrap; }
 .stat { flex: 1; min-width: 45%; background: var(--card); padding: 13px 16px; }
@@ -251,25 +281,34 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     </div>
   </header>
 
+  <div class="areas" id="areaFilter"></div>
+
   <div class="sync" id="sync"><span class="led"></span><span id="syncTxt">Connecting…</span></div>
 
   <div id="hero"></div>
 
   <div class="timer" id="timer">
     <div><div class="lbl" id="timerlbl">Sprint</div><div class="clock" id="clock">15:00</div></div>
-    <div style="display:flex;gap:8px"><button id="tplus">+5</button><button id="tstop">Stop</button></div>
+    <div class="ctl">
+      <button data-set="15">15</button><button data-set="25">25</button><button data-set="45">45</button>
+      <input class="mins" id="tCustom" placeholder="min" inputmode="numeric" maxlength="3">
+      <button id="tplus">+5</button><button id="tstop">Stop</button>
+    </div>
   </div>
 
   <div class="stats">
     <div class="stat win"><div class="v" id="stDone">0</div><div class="k">Done today</div></div>
     <div class="stat"><div class="v" id="stOpen">0</div><div class="k">Open</div></div>
-    <div class="stat"><div class="v" id="stOld">0</div><div class="k">Oldest · days</div></div>
+    <div class="stat"><div class="v" id="stFocusD">0m</div><div class="k">Focused today</div></div>
     <div class="stat"><div class="v" id="stWeek">0</div><div class="k">Done this week</div></div>
+    <div class="stat"><div class="v" id="stFocusW">0m</div><div class="k">Focused this week</div></div>
+    <div class="stat"><div class="v" id="stOld">0</div><div class="k">Oldest · days</div></div>
   </div>
 
   <div class="panel">
     <div class="field"><input id="fTitle" placeholder="What is it?" maxlength="140"></div>
     <div class="field"><input id="fStep" placeholder="First physical action" maxlength="140"></div>
+    <div class="areapick" id="areaPick"></div>
     <div class="urg" id="urgWrap">
       <div class="urgnum" id="urgNum">5</div>
       <div class="urgbody">
@@ -345,10 +384,13 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 
   /* ══════════ state ══════════ */
   // tasks keyed by id; every record carries updatedAt so two devices can merge
-  var state = { tasks: {}, rev: 0 };
+  var state = { tasks: {}, sessions: {}, areas: [], rev: 0 };
   var localOnly = {};   // skips / parked, never synced
   var current = 'work', newPrio = 5, refocusSub = false, editing = null;
-  var timer = { id: null, left: 0, running: false };
+  var newArea = '', filterArea = '';
+  var DEFAULT_AREAS = ['sales', 'admin', 'it', 'product'];
+  // mode 'down' counts toward zero then rolls into 'up' so flow is never interrupted
+  var timer = { id: null, left: 0, elapsed: 0, running: false, mode: 'down', taskId: null, startedAt: 0, planned: 0 };
   var pushT = null, pulling = false, lastRemote = null, calm = false;
 
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
@@ -379,7 +421,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
   function loadLocal() {
     try {
       var s = JSON.parse(localStorage.getItem(LOCAL + '|' + storeKey));
-      if (s && s.tasks) state = s;
+      if (s && s.tasks) { state = s; state.sessions = state.sessions || {}; state.areas = state.areas || []; }
       var l = JSON.parse(localStorage.getItem('onething_localonly|' + storeKey));
       if (l) localOnly = l;
       calm = localStorage.getItem('onething_calm') === '1';
@@ -388,7 +430,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 
   /* ══════════ merge ══════════ */
   function merge(a, b) {
-    var out = { tasks: {}, rev: Math.max(a.rev || 0, b.rev || 0) };
+    var out = { tasks: {}, sessions: {}, areas: [], rev: Math.max(a.rev || 0, b.rev || 0) };
     var ids = {};
     Object.keys(a.tasks || {}).forEach(function (k) { ids[k] = 1; });
     Object.keys(b.tasks || {}).forEach(function (k) { ids[k] = 1; });
@@ -398,13 +440,42 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       if (!y) { out.tasks[id] = x; return; }
       out.tasks[id] = (y.updatedAt || 0) > (x.updatedAt || 0) ? y : x;
     });
+    // sessions are write-once, so a plain union by id is safe
+    [a.sessions || {}, b.sessions || {}].forEach(function (src) {
+      Object.keys(src).forEach(function (k) { if (!out.sessions[k]) out.sessions[k] = src[k]; });
+    });
+    // custom area names: union, order preserved
+    (a.areas || []).concat(b.areas || []).forEach(function (n) { if (n && out.areas.indexOf(n) < 0) out.areas.push(n); });
+
     // drop tombstones and finished items after 30 days
     var cut = now() - 30 * 86400000;
     Object.keys(out.tasks).forEach(function (id) {
       var t = out.tasks[id];
       if ((t.deleted || t.done) && (t.updatedAt || 0) < cut) delete out.tasks[id];
     });
+    // keep 18 months of focus history for future reporting
+    var scut = now() - 550 * 86400000;
+    Object.keys(out.sessions).forEach(function (id) {
+      if ((out.sessions[id].end || 0) < scut) delete out.sessions[id];
+    });
     return out;
+  }
+
+  /* ══════════ areas ══════════ */
+  function allAreas() {
+    var seen = DEFAULT_AREAS.slice();
+    (state.areas || []).forEach(function (a) { if (seen.indexOf(a) < 0) seen.push(a); });
+    Object.keys(state.tasks).forEach(function (k) {
+      var a = state.tasks[k] && state.tasks[k].area;
+      if (a && seen.indexOf(a) < 0) seen.push(a);
+    });
+    return seen;
+  }
+  function areaCount(a) {
+    return Object.keys(state.tasks).filter(function (k) {
+      var t = state.tasks[k];
+      return t && !t.done && !t.deleted && t.list === current && (t.area || '') === a;
+    }).length;
   }
 
   /* ══════════ network ══════════ */
@@ -466,9 +537,16 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
   function touch(t) { t.updatedAt = now(); saveLocal(); render(); schedulePush(); }
 
   /* ══════════ selectors ══════════ */
-  function live(list) {
+  function live(list, ignoreFilter) {
     return Object.keys(state.tasks).map(function (k) { return state.tasks[k]; })
-      .filter(function (t) { return t && !t.deleted && !t.done && t.list === list; })
+      .filter(function (t) {
+        if (!t || t.deleted || t.done || t.list !== list) return false;
+        if (!ignoreFilter && filterArea) {
+          var want = filterArea === ' ' ? '' : filterArea;   // ' ' is the untagged bucket
+          if ((t.area || '') !== want) return false;
+        }
+        return true;
+      })
       .sort(function (a, b) { return b.priority !== a.priority ? b.priority - a.priority : a.created - b.created; });
   }
   function topOf(list) {
@@ -541,6 +619,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
             '<span class="sep"></span><span class="muted' + (hot ? ' hot' : '') + '">' + ageText(d) + '</span>' +
             (subs.length ? '<span class="sep"></span><span class="prog"><span class="track"><span class="fill" style="width:' + Math.round(doneN / subs.length * 100) + '%"></span></span>' + doneN + '/' + subs.length + '</span>' : '') +
             (m.skips > 1 ? '<span class="sep"></span><span class="muted hot">skipped ' + m.skips + '×</span>' : '') +
+            '<span class="sep"></span><span class="abadge" data-area="1">' + escH(t.area || 'no area') + '</span>' +
           '</div>' +
           titleHtml +
           stepHtml +
@@ -550,7 +629,8 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
         '</div>' +
         '<div class="actions">' +
           '<button class="btn primary" data-do="done">Done</button>' +
-          '<button class="btn tinted" data-do="timer">15 min</button>' +
+          '<span class="tpick"><button class="btn tinted" data-do="timer">15 min</button>' +
+            '<button class="mini" data-min="25">25</button><button class="mini" data-min="45">45</button></span>' +
           '<button class="btn quiet" data-do="skip">Not now</button>' +
           '<button class="btn quiet" data-do="drop">Delete</button>' +
         '</div>' +
@@ -609,8 +689,31 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     document.getElementById('stWeek').textContent = dn.filter(function (t) { return (t.completedAt || 0) >= wk; }).length;
     document.getElementById('stOpen').textContent = o.length;
     document.getElementById('stOld').textContent = o.length ? Math.max.apply(null, o.map(function (t) { return days(t.created); })) : 0;
-    document.getElementById('nwork').textContent = live('work').length;
-    document.getElementById('npersonal').textContent = live('personal').length;
+    document.getElementById('stFocusD').textContent = humanMin(focusSecs(today.getTime()));
+    document.getElementById('stFocusW').textContent = humanMin(focusSecs(wk));
+    document.getElementById('nwork').textContent = live('work', true).length;
+    document.getElementById('npersonal').textContent = live('personal', true).length;
+  }
+
+  function renderAreas() {
+    var f = document.getElementById('areaFilter');
+    var list = allAreas();
+    var total = live(current, true).length;
+    var html = '<button class="chip' + (filterArea === '' ? ' on' : '') + '" data-filter="">All<span class="c">' + total + '</span></button>';
+    html += list.map(function (a) {
+      var n = areaCount(a);
+      if (!n && DEFAULT_AREAS.indexOf(a) < 0) return '';
+      return '<button class="chip' + (filterArea === a ? ' on' : '') + '" data-filter="' + escH(a) + '">' + escH(a) + '<span class="c">' + n + '</span></button>';
+    }).join('');
+    var un = areaCount('');
+    if (un) html += '<button class="chip' + (filterArea === ' ' ? ' on' : '') + '" data-filter=" ">untagged<span class="c">' + un + '</span></button>';
+    f.innerHTML = html;
+
+    var p = document.getElementById('areaPick');
+    p.innerHTML = '<span class="lab">Area</span>' +
+      '<button class="chip' + (newArea === '' ? ' on' : '') + '" data-pick="">none</button>' +
+      list.map(function (a) { return '<button class="chip' + (newArea === a ? ' on' : '') + '" data-pick="' + escH(a) + '">' + escH(a) + '</button>'; }).join('') +
+      '<button class="chip add" data-pick="__new">+ new</button>';
   }
 
   function renderList() {
@@ -630,7 +733,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     el.innerHTML = (html || '<div class="row"><div class="t" style="color:#c7c7cc">Nothing here yet.</div></div>') + recent;
   }
 
-  function render() { renderHero(); renderStats(); renderList(); }
+  function render() { renderHero(); renderStats(); renderList(); renderAreas(); }
 
   /* ══════════ actions ══════════ */
   function flash() {
@@ -657,10 +760,10 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     if (!others.length) live(t.list).forEach(function (x) { lo(x.id).parked = false; });
     m.parked = true; saveLocal(); render();
   }
-  function addTask(title, step, prio, list, subs) {
+  function addTask(title, step, prio, list, subs, area) {
     var id = uid();
     state.tasks[id] = { id: id, title: title, step: step || '', priority: clampP(prio), list: list,
-      subs: subs || [], created: now(), done: false, completedAt: null, deleted: false, updatedAt: now() };
+      area: area || '', subs: subs || [], created: now(), done: false, completedAt: null, deleted: false, updatedAt: now() };
     return state.tasks[id];
   }
 
@@ -686,14 +789,16 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
         if (st) { last.subs.push({ text: st, done: sd }); last.updatedAt = now(); }
         return;
       }
+      var area = '';
+      line = line.replace(/\s+#([a-z0-9_-]{1,20})\s*$/i, function (_, a) { area = a.toLowerCase(); return ''; });
       var mm = line.match(/^(\d{1,2})\s*[·•.\-–—|:)]\s*(.+)$/);
       var prio = mm ? clampP(mm[1]) : 5;
       var rest = mm ? mm[2] : line;
       var parts = rest.split(/\s*(?:»|>>|→)\s*/);
       var title = (parts[0] || '').trim(); if (!title) return;
-      var dup = live(section).find(function (x) { return x.title.toLowerCase() === title.toLowerCase(); });
+      var dup = live(section, true).find(function (x) { return x.title.toLowerCase() === title.toLowerCase(); });
       if (dup) { last = dup; return; }
-      last = addTask(title, (parts[1] || '').trim(), prio, section, []);
+      last = addTask(title, (parts[1] || '').trim(), prio, section, [], area);
       added++;
     });
     return added;
@@ -702,8 +807,8 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     var out = ['One Thing', ''];
     ['work', 'personal'].forEach(function (list) {
       out.push(list === 'work' ? 'WORK' : 'PERSONAL');
-      live(list).forEach(function (t) {
-        out.push(t.priority + ' · ' + t.title + (t.step ? ' » ' + t.step : ''));
+      live(list, true).forEach(function (t) {
+        out.push(t.priority + ' · ' + t.title + (t.step ? ' » ' + t.step : '') + (t.area ? ' #' + t.area : ''));
         (t.subs || []).forEach(function (s) { out.push('- ' + (s.done ? '✓ ' : '') + s.text); });
       });
       out.push('');
@@ -716,27 +821,72 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
   }
 
   /* ══════════ timer ══════════ */
-  function fmt(s) { var m = Math.floor(s / 60), r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; }
+  function fmt(s) {
+    s = Math.max(0, Math.round(s));
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60;
+    return (h ? h + ':' + String(m).padStart(2, '0') : String(m)) + ':' + (r < 10 ? '0' : '') + r;
+  }
   function startTimer(mins) {
-    stopTimer(); timer.left = mins * 60; timer.running = true;
-    var b = document.getElementById('timer'); b.classList.add('on'); b.classList.remove('done');
-    document.getElementById('timerlbl').textContent = 'Sprint · just start';
+    logSession();                       // close any running session first
+    var t = topOf(current);
+    timer.left = Math.max(1, mins) * 60;
+    timer.elapsed = 0; timer.running = true; timer.mode = 'down';
+    timer.taskId = t ? t.id : null; timer.startedAt = now(); timer.planned = mins;
+    var b = document.getElementById('timer');
+    b.classList.add('on'); b.classList.remove('done', 'over');
     tick(); timer.id = setInterval(tick, 1000);
   }
   function tick() {
-    document.getElementById('clock').textContent = fmt(Math.max(0, timer.left));
-    if (timer.left <= 0) {
-      clearInterval(timer.id); timer.running = false;
-      document.getElementById('timer').classList.add('done');
-      document.getElementById('timerlbl').textContent = 'Time up';
-      document.getElementById('clock').textContent = '0:00'; return;
+    var lbl = document.getElementById('timerlbl'), clk = document.getElementById('clock');
+    if (timer.mode === 'down') {
+      if (timer.left <= 0) {                       // roll over instead of stopping
+        timer.mode = 'up';
+        document.getElementById('timer').classList.add('over');
+        lbl.textContent = 'Past ' + timer.planned + ' min · still going';
+        clk.textContent = '+0:00';
+        return;
+      }
+      lbl.textContent = 'Sprint · just start';
+      clk.textContent = fmt(timer.left);
+      timer.left--; timer.elapsed++;
+    } else {
+      timer.elapsed++;
+      clk.textContent = '+' + fmt(timer.elapsed - timer.planned * 60);
     }
-    timer.left--;
+  }
+  // a finished stretch of focus becomes a record, which is what future reports will read
+  function logSession() {
+    if (!timer.running) return;
+    var secs = Math.round((now() - timer.startedAt) / 1000);
+    timer.running = false;
+    if (timer.id) clearInterval(timer.id);
+    timer.id = null;
+    if (secs < 30) return;                          // ignore accidental taps
+    var t = timer.taskId ? state.tasks[timer.taskId] : null;
+    var id = uid();
+    state.sessions[id] = {
+      id: id, taskId: timer.taskId || '', title: t ? t.title : '',
+      area: t ? (t.area || '') : '', list: t ? t.list : current,
+      start: timer.startedAt, end: now(), sec: secs
+    };
+    saveLocal(); schedulePush();
   }
   function stopTimer() {
+    logSession();
     if (timer.id) clearInterval(timer.id);
-    timer.id = null; timer.running = false;
-    document.getElementById('timer').classList.remove('on', 'done');
+    timer.id = null; timer.running = false; timer.mode = 'down';
+    document.getElementById('timer').classList.remove('on', 'done', 'over');
+    renderStats();
+  }
+  function focusSecs(since) {
+    return Object.keys(state.sessions || {}).reduce(function (n, k) {
+      var s = state.sessions[k];
+      return n + ((s && (s.end || 0) >= since) ? (s.sec || 0) : 0);
+    }, 0);
+  }
+  function humanMin(sec) {
+    var m = Math.round(sec / 60);
+    return m < 60 ? m + 'm' : (Math.floor(m / 60) + 'h' + (m % 60 ? ' ' + (m % 60) + 'm' : ''));
   }
 
   /* ══════════ wiring ══════════ */
@@ -751,6 +901,10 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 
     document.getElementById('hero').addEventListener('click', function (e) {
       var t = topOf(current); if (!t) return;
+      var mn = e.target.closest('[data-min]');
+      if (mn) { startTimer(parseInt(mn.dataset.min, 10)); return; }
+      var ab = e.target.closest('[data-area]');
+      if (ab) { cycleArea(t); return; }
       var ee = e.target.closest('[data-edit]');
       if (ee) { editing = { id: t.id, field: ee.dataset.edit }; render(); return; }
       var se = e.target.closest('[data-subedit]');
@@ -773,6 +927,32 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       else if (b.dataset.raise) nudge(b.dataset.raise, 2);
     });
 
+    // clicking the badge on the card walks through the areas, so tagging never needs a menu
+    window.cycleArea = function (t) {
+      var list = [''].concat(allAreas());
+      var i = list.indexOf(t.area || '');
+      t.area = list[(i + 1) % list.length];
+      touch(t);
+    };
+
+    document.getElementById('areaFilter').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-filter]'); if (!b) return;
+      filterArea = b.dataset.filter; render();
+    });
+
+    document.getElementById('areaPick').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-pick]'); if (!b) return;
+      var v = b.dataset.pick;
+      if (v === '__new') {
+        var n = (prompt('New area name') || '').trim().toLowerCase();
+        if (!n) return;
+        state.areas = state.areas || [];
+        if (state.areas.indexOf(n) < 0 && DEFAULT_AREAS.indexOf(n) < 0) state.areas.push(n);
+        newArea = n; saveLocal(); schedulePush();
+      } else newArea = v;
+      renderAreas();
+    });
+
     var range = document.getElementById('urgRange');
     function paintUrg() {
       var p = clampP(range.value); newPrio = p;
@@ -785,7 +965,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     function submitTask() {
       var ti = document.getElementById('fTitle');
       var title = ti.value.trim(); if (!title) { ti.focus(); return; }
-      addTask(title, document.getElementById('fStep').value.trim(), newPrio, current, []);
+      addTask(title, document.getElementById('fStep').value.trim(), newPrio, current, [], newArea);
       ti.value = ''; document.getElementById('fStep').value = '';
       saveLocal(); render(); schedulePush();
     }
@@ -825,7 +1005,20 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     document.getElementById('tstop').addEventListener('click', stopTimer);
     document.getElementById('tplus').addEventListener('click', function () {
       if (!timer.running) { startTimer(5); return; }
-      timer.left += 300; document.getElementById('clock').textContent = fmt(timer.left);
+      if (timer.mode === 'up') {                 // pull it back into countdown
+        timer.mode = 'down'; timer.left = 300; timer.planned += 5;
+        document.getElementById('timer').classList.remove('over');
+      } else { timer.left += 300; timer.planned += 5; }
+      document.getElementById('clock').textContent = fmt(timer.left);
+    });
+    document.getElementById('timer').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-set]'); if (!b) return;
+      startTimer(parseInt(b.dataset.set, 10));
+    });
+    document.getElementById('tCustom').addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      var v = parseInt(this.value, 10);
+      if (v > 0 && v <= 480) { startTimer(v); this.value = ''; this.blur(); }
     });
 
     document.addEventListener('keydown', function (e) {
