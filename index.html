@@ -260,6 +260,23 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px;
 }
 #focus.on { display: flex; }
 @keyframes fin { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: none; } }
+/* generated backdrop, unique per area */
+#fart { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+#fart svg { position: absolute; top: 50%; left: 50%; width: 150%; height: 150%; transform: translate(-50%, -50%);
+  transform-origin: center; }
+#focus.idle #fart svg { animation: drift 90s linear infinite; }
+#focus.idle #fart .glow { animation: breathe2 9s ease-in-out infinite; }
+body.working #fart svg, body.calm #fart svg { animation: none; }
+body.working #fart .glow, body.calm #fart .glow { animation: none; }
+@keyframes drift { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes breathe2 { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+#focus > *:not(#fart) { position: relative; z-index: 1; }
+
+.fwhy { text-align: center; font-size: 13.5px; letter-spacing: .01em; color: rgba(242,242,244,.4); margin-top: 4px; }
+.fwhy b { display: block; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: rgba(242,242,244,.22); margin-bottom: 6px; font-weight: 600; }
+.fwhy span { color: rgba(242,242,244,.72); }
+body.working .fwhy { opacity: 0; transition: opacity .6s; }
+
 .ftop { display: flex; align-items: center; gap: 12px; }
 .fdot { width: 8px; height: 8px; border-radius: 50%; background: var(--fu, #ff3b30); animation: blip 1.6s ease-in-out infinite; }
 body.working .fdot, body.calm .fdot { animation: none; }
@@ -314,6 +331,11 @@ body.working #focus .ftitle, body.calm #focus .ftitle { animation: none; }
 @keyframes fadeq { 0% { opacity: 0; } 18% { opacity: 1; } 72% { opacity: 1; } 100% { opacity: 0; } }
 #flash .ring { width: 92px; height: 92px; border-radius: 50%; border: 2px solid var(--green); position: relative; animation: pop .5s cubic-bezier(.2,1.3,.4,1); }
 #flash .ring::after { content: ""; position: absolute; left: 30px; top: 25px; width: 24px; height: 42px; border: solid var(--green); border-width: 0 2px 2px 0; transform: rotate(43deg); }
+#flash { flex-direction: column; gap: 22px; }
+#flashWhy { font-size: 17px; font-weight: 500; letter-spacing: -.01em; color: var(--sub); text-align: center; max-width: 24ch; }
+#flashWhy b { display: block; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); margin-bottom: 6px; }
+body.dark-flash #flash { background: rgba(8,8,10,.9); }
+body.dark-flash #flashWhy { color: rgba(242,242,244,.8); }
 @keyframes pop { from { transform: scale(.55); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--faint); }
@@ -321,7 +343,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 </style>
 </head>
 <body>
-<div id="flash"><div class="ring"></div></div>
+<div id="flash"><div class="ring"></div><div id="flashWhy"></div></div>
 <div id="focus"></div>
 
 <div id="lock">
@@ -398,6 +420,10 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       <button class="btn tinted" id="ioCopy">Copy list out</button>
       <button class="btn quiet" id="forget">Lock this device</button>
     </div>
+    <h3 style="margin-top:22px">What this is all for</h3>
+    <p>One reason per line. These show in focus mode and when you finish something.</p>
+    <textarea id="whyBox" style="min-height:110px"></textarea>
+    <div class="iorow"><button class="btn tinted" id="whySave">Save reasons</button></div>
   </div>
 
   <footer>Encrypted · synced across your devices</footer>
@@ -508,6 +534,10 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     });
     // custom area names: union, order preserved
     (a.areas || []).concat(b.areas || []).forEach(function (n) { if (n && out.areas.indexOf(n) < 0) out.areas.push(n); });
+    // the reasons list is edited wholesale, so the newer edit wins outright
+    var an = a.whyAt || 0, bn = b.whyAt || 0;
+    out.whyAt = Math.max(an, bn);
+    out.why = (bn > an ? b.why : a.why) || a.why || b.why || [];
 
     // drop tombstones and finished items after 30 days
     var cut = now() - 30 * 86400000;
@@ -798,8 +828,75 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 
   function render() { renderHero(); renderStats(); renderList(); renderAreas(); if (focusOn) renderFocus(); }
 
+  /* ══════════ generated art ══════════ */
+  // same area always produces the same pattern, so each one gets a visual identity you learn
+  function hash(str) { var h = 5381; for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return Math.abs(h); }
+  function prng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+  function areaArt(area) {
+    var seed = hash(area || 'none');
+    var r = prng(seed);
+    var hue = seed % 360;
+    var kind = seed % 6;
+    var S = 400, m = '', i, j;
+    var stroke = 'hsl(' + hue + ',72%,62%)';
+
+    if (kind === 0) {                                   // concentric arcs
+      for (i = 0; i < 26; i++) m += '<circle cx="' + (140 + r() * 120).toFixed(0) + '" cy="' + (150 + r() * 100).toFixed(0) +
+        '" r="' + (14 + i * 15) + '" fill="none" stroke="' + stroke + '" stroke-width="' + (0.6 + r() * 1.2).toFixed(2) + '"/>';
+    } else if (kind === 1) {                            // long waves
+      for (i = 0; i < 22; i++) {
+        var y = i * 19 + 6, a = 10 + r() * 26, w = 60 + r() * 70, d = 'M -40 ' + y;
+        for (j = -40; j < S + 60; j += 20) d += ' Q ' + (j + 10) + ' ' + (y - a) + ' ' + (j + 20) + ' ' + y;
+        m += '<path d="' + d + '" fill="none" stroke="' + stroke + '" stroke-width="' + (0.5 + r()).toFixed(2) + '"/>';
+      }
+    } else if (kind === 2) {                            // dot matrix, size falls off from a focal point
+      var cx = r() * S, cy = r() * S;
+      for (i = 0; i < 26; i++) for (j = 0; j < 26; j++) {
+        var x = i * 16 + 8, yy = j * 16 + 8;
+        var dd = Math.hypot(x - cx, yy - cy) / S;
+        m += '<circle cx="' + x + '" cy="' + yy + '" r="' + (0.6 + (1 - dd) * 3.4).toFixed(2) + '" fill="' + stroke + '"/>';
+      }
+    } else if (kind === 3) {                            // rays from a corner
+      var ox = r() < .5 ? -40 : S + 40, oy = r() * S;
+      for (i = 0; i < 40; i++) {
+        var ang = (i / 40) * Math.PI * 2;
+        m += '<line x1="' + ox + '" y1="' + oy + '" x2="' + (ox + Math.cos(ang) * 700).toFixed(0) +
+          '" y2="' + (oy + Math.sin(ang) * 700).toFixed(0) + '" stroke="' + stroke + '" stroke-width="' + (0.4 + r() * 1.1).toFixed(2) + '"/>';
+      }
+    } else if (kind === 4) {                            // hex lattice
+      var s = 26;
+      for (i = -1; i < 12; i++) for (j = -1; j < 14; j++) {
+        var hx = i * s * 1.5, hy = j * s * 1.73 + (i % 2 ? s * .87 : 0), p = '';
+        for (var k2 = 0; k2 < 6; k2++) p += (hx + s * Math.cos(k2 * Math.PI / 3)).toFixed(1) + ',' + (hy + s * Math.sin(k2 * Math.PI / 3)).toFixed(1) + ' ';
+        m += '<polygon points="' + p + '" fill="none" stroke="' + stroke + '" stroke-width="0.7"/>';
+      }
+    } else {                                            // topographic contours
+      for (i = 0; i < 20; i++) {
+        var rr = 20 + i * 17, cx2 = 200 + Math.sin(i * .7) * 50, cy2 = 200 + Math.cos(i * .5) * 45, d2 = '';
+        for (j = 0; j <= 36; j++) {
+          var t2 = j / 36 * Math.PI * 2, rad = rr * (1 + 0.13 * Math.sin(t2 * 3 + i) + 0.08 * Math.cos(t2 * 5 - i));
+          d2 += (j ? ' L ' : 'M ') + (cx2 + Math.cos(t2) * rad).toFixed(1) + ' ' + (cy2 + Math.sin(t2) * rad * .8).toFixed(1);
+        }
+        m += '<path d="' + d2 + ' Z" fill="none" stroke="' + stroke + '" stroke-width="' + (0.5 + r() * .9).toFixed(2) + '"/>';
+      }
+    }
+    return '<svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">' +
+      '<defs><radialGradient id="g' + seed % 9999 + '"><stop offset="0%" stop-color="hsl(' + hue + ',80%,58%)" stop-opacity=".38"/>' +
+      '<stop offset="100%" stop-color="hsl(' + hue + ',80%,50%)" stop-opacity="0"/></radialGradient></defs>' +
+      '<g opacity="0.14">' + m + '</g>' +
+      '<ellipse class="glow" cx="200" cy="120" rx="260" ry="200" fill="url(#g' + seed % 9999 + ')"/>' +
+      '</svg>';
+  }
+
   /* ══════════ focus mode ══════════ */
   var RC = 2 * Math.PI * 78;   // ring circumference, r = 78
+  var WHY_DEFAULT = ['More time with the family', 'More travelling', 'More kilometres on the bike',
+                     'More time for sport', 'Evenings that are actually yours', 'Weekends without a backlog'];
+  function whyList() { return (state.why && state.why.length) ? state.why : WHY_DEFAULT; }
+  function whyFor(t) { var w = whyList(); return w[hash(t.id) % w.length]; }
   function renderFocus() {
     var el = document.getElementById('focus');
     var t = topOf(current);
@@ -828,6 +925,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     }
 
     el.innerHTML =
+      '<div id="fart">' + areaArt(t.area || 'none') + '</div>' +
       '<div class="ftop">' +
         '<span class="fdot"></span>' +
         '<span class="fmeta"><b>' + t.priority + ' · ' + LABEL[t.priority] + '</b>' +
@@ -857,6 +955,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
             ? '<button class="fbtn go" data-f="done">Done</button><button class="fbtn" data-f="plus">+5 min</button><button class="fbtn" data-f="stop">Stop</button>'
             : '<button class="fbtn go" data-f="t15">Start 15 min</button><button class="fbtn" data-f="t45">45</button><button class="fbtn" data-f="done">Done</button>') +
         '</div>' +
+        '<div class="fwhy"><b>What this buys</b><span>' + escH(whyFor(t)) + '</span></div>' +
       '</div>';
   }
 
@@ -864,16 +963,19 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
   function closeFocus() { focusOn = false; document.getElementById('focus').className = ''; }
 
   /* ══════════ actions ══════════ */
-  function flash() {
+  function flash(why) {
     var f = document.getElementById('flash');
+    document.getElementById('flashWhy').innerHTML = why ? '<b>One less thing between you and</b>' + escH(why) : '';
+    document.body.classList.toggle('dark-flash', focusOn);
     f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
-    setTimeout(function () { f.classList.remove('on'); }, 640);
+    setTimeout(function () { f.classList.remove('on'); }, 1500);
   }
   function complete(id) {
     var t = state.tasks[id]; if (!t) return;
+    var why = whyFor(t);
     t.done = true; t.completedAt = now();
     Object.keys(localOnly).forEach(function (k) { if (state.tasks[k] && state.tasks[k].list === t.list) localOnly[k].parked = false; });
-    flash(); stopTimer(); touch(t);
+    flash(why); stopTimer(); touch(t);
   }
   function drop(id) { var t = state.tasks[id]; if (!t) return; t.deleted = true; touch(t); }
   function nudge(id, delta) {
@@ -1143,7 +1245,17 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       var l = document.getElementById('list'); l.classList.toggle('on');
       this.textContent = l.classList.contains('on') ? 'Hide all' : 'Show all';
     });
-    document.getElementById('toggleIO').addEventListener('click', function () { document.getElementById('io').classList.toggle('on'); });
+    document.getElementById('toggleIO').addEventListener('click', function () {
+      var io = document.getElementById('io');
+      io.classList.toggle('on');
+      if (io.classList.contains('on')) document.getElementById('whyBox').value = whyList().join('\n');
+    });
+    document.getElementById('whySave').addEventListener('click', function () {
+      var lines = document.getElementById('whyBox').value.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+      state.why = lines; state.whyAt = now();
+      saveLocal(); schedulePush(); render();
+      var b = this; b.textContent = 'Saved'; setTimeout(function () { b.textContent = 'Save reasons'; }, 1600);
+    });
     document.getElementById('toggleCalm').addEventListener('click', function () { calm = !calm; saveLocal(); applyCalm(); });
 
     document.getElementById('ioLoad').addEventListener('click', function () {
