@@ -279,8 +279,11 @@ body.working #fart .glow, body.calm #fart .glow { animation: none; }
 .fwhy span {
   display: block; font-size: clamp(26px, 5.4vw, 52px); font-weight: 400; line-height: 1.12;
   letter-spacing: -.025em; color: rgba(242,242,244,.94);
+  transition: font-size .5s cubic-bezier(.2,.8,.3,1), color .5s;
 }
-body.working .fwhy { opacity: 0; transition: opacity .6s; pointer-events: none; }
+/* stays on screen while you work, just steps back so the task and the clock lead */
+body.working .fwhy span { font-size: clamp(20px, 3.6vw, 34px); color: rgba(242,242,244,.66); }
+body.working .fwhy b { color: rgba(242,242,244,.18); }
 
 .ftop { display: flex; align-items: center; gap: 12px; }
 .fdot { width: 8px; height: 8px; border-radius: 50%; background: var(--fu, #ff3b30); animation: blip 1.6s ease-in-out infinite; }
