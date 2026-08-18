@@ -251,6 +251,39 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px;
 .io textarea:focus { outline: none; border-color: var(--sub); }
 .io .iorow { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 
+/* ══ map: everything at one glance ══ */
+#map { position: fixed; inset: 0; z-index: 88; display: none; flex-direction: column; background: var(--bg);
+  padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 16px); }
+#map.on { display: flex; animation: fin .3s cubic-bezier(.2,.8,.3,1); }
+.mtop { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.mtitle { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.mtop .sp { margin-left: auto; display: flex; gap: 6px; }
+.mbtn { font: inherit; font-size: 12.5px; font-weight: 500; padding: 7px 13px; border-radius: 980px;
+  border: 1px solid var(--hair); background: var(--card); color: var(--sub); cursor: pointer; }
+.mbtn:hover { color: var(--ink); border-color: var(--faint); }
+#mapSvg { flex: 1; width: 100%; touch-action: none; cursor: grab; user-select: none; }
+#mapSvg.drag { cursor: grabbing; }
+#mapSvg text { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; }
+.nodehit { cursor: pointer; }
+.nodehit:hover .ndot { stroke: var(--ink); stroke-width: 2.5; }
+.nlabel { font-size: 13px; fill: #3a3a3c; }
+.narea { font-size: 15px; font-weight: 600; fill: var(--ink); letter-spacing: -.01em; }
+.nroot { font-size: 17px; font-weight: 600; fill: #fff; letter-spacing: .02em; }
+.nsel .ndot { stroke: var(--ink); stroke-width: 3; }
+.mlink { fill: none; stroke: rgba(0,0,0,.13); }
+.mhint { text-align: center; font-size: 12px; color: var(--faint); padding-top: 6px; }
+
+.msheet { background: var(--card); border-radius: 18px; padding: 15px 18px; margin-top: 8px;
+  box-shadow: 0 2px 20px rgba(0,0,0,.08); display: none; }
+.msheet.on { display: block; animation: rise .25s cubic-bezier(.2,.8,.3,1); }
+.msheet .mst { font-size: 17px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 3px; }
+.msheet .msm { font-size: 12px; color: var(--sub); margin-bottom: 12px; }
+.msheet .msrow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.msheet .urgbig { font-size: 26px; font-weight: 500; font-variant-numeric: tabular-nums; width: 38px; text-align: center; letter-spacing: -.03em; }
+.msheet .rnd { font: inherit; font-size: 17px; line-height: 1; width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid var(--hair); background: transparent; color: var(--sub); cursor: pointer; }
+.msheet .rnd:hover { color: var(--ink); border-color: var(--faint); }
+
 /* ══ focus mode: the task, and nothing else ══ */
 #focus {
   position: fixed; inset: 0; z-index: 90; display: none; flex-direction: column;
@@ -358,6 +391,20 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 <body>
 <div id="flash"><div class="ring"></div><div id="flashWhy"></div></div>
 <div id="focus"></div>
+<div id="map">
+  <div class="mtop">
+    <span class="mtitle" id="mapTitle">Map</span>
+    <span class="sp">
+      <button class="mbtn" data-m="zin">+</button>
+      <button class="mbtn" data-m="zout">−</button>
+      <button class="mbtn" data-m="fit">Fit</button>
+      <button class="mbtn" data-m="close">Close</button>
+    </span>
+  </div>
+  <svg id="mapSvg"></svg>
+  <div class="msheet" id="mSheet"></div>
+  <div class="mhint">Tap a task to re-rank it or open it in focus</div>
+</div>
 
 <div id="lock">
   <div class="mark"><i></i><s></s></div>
@@ -418,6 +465,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 
   <div class="bar">
     <button class="link" id="toggleList">Show all</button>
+    <button class="link" id="openMapBtn">Map</button>
     <button class="link" id="toggleIO">Import / export</button>
     <button class="link" id="toggleCalm">Calm mode: off</button>
   </div>
@@ -488,7 +536,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
   var state = { tasks: {}, sessions: {}, areas: [], rev: 0 };
   var localOnly = {};   // skips / parked, never synced
   var current = 'work', newPrio = 5, refocusSub = false, editing = null;
-  var newArea = '', filterArea = '', focusOn = false;
+  var newArea = '', filterArea = '', focusOn = false, focusId = null;
   var DEFAULT_AREAS = ['sales', 'admin', 'it', 'product'];
   // mode 'down' counts toward zero then rolls into 'up' so flow is never interrupted
   var timer = { id: null, left: 0, elapsed: 0, running: false, mode: 'down', taskId: null, startedAt: 0, planned: 0 };
@@ -910,9 +958,15 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
                      'More time for sport', 'Evenings that are actually yours', 'Weekends without a backlog'];
   function whyList() { return (state.why && state.why.length) ? state.why : WHY_DEFAULT; }
   function whyFor(t) { var w = whyList(); return w[hash(t.id) % w.length]; }
+  // focus shows whatever the map handed it, otherwise the top of the queue
+  function focusTask() {
+    var p = focusId ? state.tasks[focusId] : null;
+    if (p && !p.done && !p.deleted) return p;
+    return topOf(current);
+  }
   function renderFocus() {
     var el = document.getElementById('focus');
-    var t = topOf(current);
+    var t = focusTask();
     if (!t) {
       el.className = 'on';
       el.innerHTML = '<div class="ftop"><span class="fmeta">Focus</span><button class="fx" data-f="exit">Close</button></div>' +
@@ -973,7 +1027,139 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
   }
 
   function openFocus() { focusOn = true; renderFocus(); }
-  function closeFocus() { focusOn = false; document.getElementById('focus').className = ''; }
+  function closeFocus() { focusOn = false; focusId = null; document.getElementById('focus').className = ''; }
+
+  /* ══════════ map ══════════ */
+  var mapOn = false, mapSel = null, view = { x: 0, y: 0, w: 1000, h: 700 }, nodes = [];
+
+  function buildMap() {
+    var tasks = live(current, true);
+    nodes = [];
+    var groups = {}, order = [];
+    tasks.forEach(function (t) {
+      var a = t.area || 'no area';
+      if (!groups[a]) { groups[a] = []; order.push(a); }
+      groups[a].push(t);
+    });
+    order.sort(function (a, b) { return groups[b].length - groups[a].length; });
+
+    var R1 = 190, R2 = 380;
+    // wedge width follows how many tasks an area holds, so load is visible in the shape itself
+    var weights = order.map(function (a) { return groups[a].length + 1.3; });
+    var wsum = weights.reduce(function (a, b) { return a + b; }, 0) || 1;
+    var gap = 0.10, avail = Math.PI * 2 - order.length * gap;
+    var ang = -Math.PI / 2 - avail / 2;
+    var svg = '', labels = '';
+
+    order.forEach(function (name, gi) {
+      var share = weights[gi] / wsum * avail;
+      var mid = ang + share / 2;
+      var ax = Math.cos(mid) * R1, ay = Math.sin(mid) * R1;
+
+      svg += '<path class="mlink" d="M 0 0 Q ' + (ax * .5).toFixed(1) + ' ' + (ay * .5).toFixed(1) +
+             ' ' + ax.toFixed(1) + ' ' + ay.toFixed(1) + '" stroke-width="2"/>';
+
+      var items = groups[name].slice().sort(function (a, b) { return b.priority - a.priority; });
+      var n = items.length;
+      items.forEach(function (t, i) {
+        var pad = Math.min(0.06, share * 0.1);
+        var a0 = ang + pad, a1 = ang + share - pad;
+        var ta = n === 1 ? mid : a0 + (a1 - a0) * (i / (n - 1));
+        var rr = R2 + (i % 2 ? 46 : 0);                      // slight stagger so labels never collide
+        var tx = Math.cos(ta) * rr, ty = Math.sin(ta) * rr;
+        var rad = 8 + Math.min(7, days(t.created) / 9);      // older tasks grow
+
+        svg += '<path class="mlink" d="M ' + ax.toFixed(1) + ' ' + ay.toFixed(1) + ' Q ' +
+               (Math.cos(ta) * (R1 + 60)).toFixed(1) + ' ' + (Math.sin(ta) * (R1 + 60)).toFixed(1) + ' ' +
+               tx.toFixed(1) + ' ' + ty.toFixed(1) + '" stroke-width="1.4"/>';
+
+        var flip = Math.cos(ta) < 0;
+        var lx = tx + Math.cos(ta) * (rad + 9), ly = ty + Math.sin(ta) * (rad + 9);
+        var deg = ta * 180 / Math.PI + (flip ? 180 : 0);
+        var label = t.title.length > 26 ? t.title.slice(0, 25) + '…' : t.title;
+        labels += '<g class="nodehit' + (mapSel === t.id ? ' nsel' : '') + '" data-task="' + t.id + '">' +
+          '<circle class="ndot" cx="' + tx.toFixed(1) + '" cy="' + ty.toFixed(1) + '" r="' + rad.toFixed(1) +
+            '" fill="' + LISTC[t.priority] + '" stroke="#fff" stroke-width="1.5"/>' +
+          '<text class="nlabel" x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" dy="0.35em" ' +
+            'text-anchor="' + (flip ? 'end' : 'start') + '" transform="rotate(' + deg.toFixed(1) + ' ' + lx.toFixed(1) + ' ' + ly.toFixed(1) + ')">' +
+            escH(label) + '</text></g>';
+
+        nodes.push({ x: lx + (flip ? -120 : 120), y: ly });
+        nodes.push({ x: tx, y: ty });
+      });
+
+      labels += '<g><circle cx="' + ax.toFixed(1) + '" cy="' + ay.toFixed(1) + '" r="26" fill="#fff" stroke="rgba(0,0,0,.12)" stroke-width="1.5"/>' +
+        '<text class="narea" x="' + ax.toFixed(1) + '" y="' + ay.toFixed(1) + '" dy="0.35em" text-anchor="middle">' +
+        escH(String(groups[name].length)) + '</text>' +
+        '<text class="nlabel" x="' + ax.toFixed(1) + '" y="' + (ay + 44).toFixed(1) + '" text-anchor="middle" style="font-weight:600">' +
+        escH(name) + '</text></g>';
+      nodes.push({ x: ax, y: ay + 50 });
+
+      ang += share + gap;
+    });
+
+    var root = '<g><circle cx="0" cy="0" r="46" fill="#1d1d1f"/>' +
+      '<text class="nroot" x="0" y="0" dy="0.35em" text-anchor="middle">' + (current === 'work' ? 'WORK' : 'LIFE') + '</text></g>';
+
+    document.getElementById('mapSvg').innerHTML = '<g id="mapG">' + svg + root + labels + '</g>';
+    document.getElementById('mapTitle').textContent =
+      (current === 'work' ? 'Work' : 'Personal') + ' · ' + tasks.length + ' open · ' + order.length + ' areas';
+    if (!tasks.length) document.getElementById('mapSvg').innerHTML =
+      '<text x="50%" y="50%" text-anchor="middle" class="narea">Nothing open here.</text>';
+  }
+
+  function fitMap() {
+    if (!nodes.length) { view = { x: -500, y: -350, w: 1000, h: 700 }; return applyView(); }
+    var xs = nodes.map(function (n) { return n.x; }), ys = nodes.map(function (n) { return n.y; });
+    var pad = 70;
+    var x0 = Math.min.apply(null, xs) - pad, x1 = Math.max.apply(null, xs) + pad;
+    var y0 = Math.min.apply(null, ys) - pad, y1 = Math.max.apply(null, ys) + pad;
+    var el = document.getElementById('mapSvg');
+    var ar = (el.clientWidth || 800) / (el.clientHeight || 600);
+    var w = x1 - x0, h = y1 - y0;
+    if (w / h < ar) { var nw = h * ar; x0 -= (nw - w) / 2; w = nw; } else { var nh = w / ar; y0 -= (nh - h) / 2; h = nh; }
+    view = { x: x0, y: y0, w: w, h: h };
+    applyView();
+  }
+  function applyView() {
+    document.getElementById('mapSvg').setAttribute('viewBox',
+      view.x.toFixed(1) + ' ' + view.y.toFixed(1) + ' ' + view.w.toFixed(1) + ' ' + view.h.toFixed(1));
+  }
+  function zoom(f, cx, cy) {
+    var el = document.getElementById('mapSvg');
+    if (cx == null) { cx = view.x + view.w / 2; cy = view.y + view.h / 2; }
+    var nw = Math.max(220, Math.min(6000, view.w * f)), nh = nw * (view.h / view.w);
+    view.x = cx - (cx - view.x) * (nw / view.w);
+    view.y = cy - (cy - view.y) * (nh / view.h);
+    view.w = nw; view.h = nh; applyView();
+  }
+
+  function renderSheet() {
+    var s = document.getElementById('mSheet');
+    var t = mapSel ? state.tasks[mapSel] : null;
+    if (!t) { s.className = 'msheet'; return; }
+    s.className = 'msheet on';
+    s.innerHTML =
+      '<div class="mst">' + escH(t.title) + '</div>' +
+      '<div class="msm">' + escH(t.area || 'no area') + ' · ' + ageText(days(t.created)) +
+        ((t.subs || []).length ? ' · ' + t.subs.filter(function (x) { return x.done; }).length + '/' + t.subs.length + ' steps' : '') + '</div>' +
+      '<div class="msrow">' +
+        '<button class="rnd" data-m="down">−</button>' +
+        '<span class="urgbig" style="color:' + LISTC[t.priority] + '">' + t.priority + '</span>' +
+        '<button class="rnd" data-m="up">+</button>' +
+        '<span class="msm" style="margin:0 6px 0 2px">' + LABEL[t.priority] + '</span>' +
+        '<button class="mbtn" data-m="focus" style="margin-left:auto">Open in focus</button>' +
+        '<button class="mbtn" data-m="mdone">Done</button>' +
+      '</div>';
+  }
+
+  function openMap() {
+    mapOn = true; mapSel = null;
+    document.getElementById('map').classList.add('on');
+    buildMap(); renderSheet();
+    requestAnimationFrame(fitMap);
+  }
+  function closeMap() { mapOn = false; mapSel = null; document.getElementById('map').classList.remove('on'); }
 
   /* ══════════ actions ══════════ */
   function flash(why) {
@@ -987,6 +1173,8 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
   function complete(id) {
     var t = state.tasks[id]; if (!t) return;
     var why = whyFor(t);
+    if (focusId === id) focusId = null;
+    if (mapSel === id) mapSel = null;
     t.done = true; t.completedAt = now();
     Object.keys(localOnly).forEach(function (k) { if (state.tasks[k] && state.tasks[k].list === t.list) localOnly[k].parked = false; });
     flash(why); stopTimer(); touch(t);
@@ -1184,7 +1372,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 
     document.getElementById('focus').addEventListener('click', function (e) {
       var b = e.target.closest('[data-f]'); if (!b) return;
-      var t = topOf(current);
+      var t = focusTask();
       var a = b.dataset.f;
       if (a === 'exit') return closeFocus();
       if (!t) return closeFocus();
@@ -1215,6 +1403,64 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       t.area = list[(i + 1) % list.length];
       touch(t);
     };
+
+    document.getElementById('openMapBtn').addEventListener('click', openMap);
+
+    document.getElementById('map').addEventListener('click', function (e) {
+      var n = e.target.closest('[data-task]');
+      if (n) { mapSel = n.dataset.task; buildMap(); renderSheet(); return; }
+      var b = e.target.closest('[data-m]'); if (!b) return;
+      var a = b.dataset.m, t = mapSel ? state.tasks[mapSel] : null;
+      if (a === 'close') return closeMap();
+      if (a === 'fit') return fitMap();
+      if (a === 'zin') return zoom(0.75);
+      if (a === 'zout') return zoom(1.33);
+      if (!t) return;
+      if (a === 'up' || a === 'down') {
+        t.priority = Math.min(10, Math.max(1, t.priority + (a === 'up' ? 1 : -1)));
+        lo(t.id).parked = false; t.updatedAt = now();
+        saveLocal(); schedulePush(); buildMap(); renderSheet(); renderHero(); renderList();
+      } else if (a === 'focus') { focusId = t.id; closeMap(); openFocus(); }
+      else if (a === 'mdone') { complete(t.id); buildMap(); renderSheet(); }
+    });
+
+    // pan and zoom
+    (function () {
+      var el = document.getElementById('mapSvg'), drag = null, pinch = null;
+      function pt(ev) { return { x: ev.clientX, y: ev.clientY }; }
+      el.addEventListener('pointerdown', function (ev) {
+        if (ev.target.closest('[data-task]')) return;
+        drag = { p: pt(ev), v: { x: view.x, y: view.y } };
+        el.classList.add('drag'); el.setPointerCapture(ev.pointerId);
+      });
+      el.addEventListener('pointermove', function (ev) {
+        if (!drag) return;
+        var r = el.getBoundingClientRect();
+        view.x = drag.v.x - (ev.clientX - drag.p.x) * (view.w / r.width);
+        view.y = drag.v.y - (ev.clientY - drag.p.y) * (view.h / r.height);
+        applyView();
+      });
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t2) {
+        el.addEventListener(t2, function () { drag = null; el.classList.remove('drag'); });
+      });
+      el.addEventListener('wheel', function (ev) {
+        ev.preventDefault();
+        var r = el.getBoundingClientRect();
+        var cx = view.x + (ev.clientX - r.left) / r.width * view.w;
+        var cy = view.y + (ev.clientY - r.top) / r.height * view.h;
+        zoom(ev.deltaY > 0 ? 1.12 : 0.89, cx, cy);
+      }, { passive: false });
+      el.addEventListener('touchstart', function (ev) {
+        if (ev.touches.length === 2) pinch = Math.hypot(ev.touches[0].clientX - ev.touches[1].clientX, ev.touches[0].clientY - ev.touches[1].clientY);
+      });
+      el.addEventListener('touchmove', function (ev) {
+        if (ev.touches.length !== 2 || !pinch) return;
+        ev.preventDefault();
+        var d = Math.hypot(ev.touches[0].clientX - ev.touches[1].clientX, ev.touches[0].clientY - ev.touches[1].clientY);
+        if (Math.abs(d - pinch) > 6) { zoom(pinch / d); pinch = d; }
+      }, { passive: false });
+      el.addEventListener('touchend', function () { pinch = null; });
+    })();
 
     document.getElementById('areaFilter').addEventListener('click', function (e) {
       var b = e.target.closest('[data-filter]'); if (!b) return;
@@ -1316,7 +1562,9 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       var tag = (e.target.tagName || '').toLowerCase();
       if (tag === 'input' || tag === 'textarea') return;
       var t = topOf(current), k = e.key.toLowerCase();
+      if (e.key === 'Escape' && mapOn) { e.preventDefault(); closeMap(); return; }
       if (e.key === 'Escape' && focusOn) { e.preventDefault(); closeFocus(); return; }
+      if (k === 'm') { e.preventDefault(); mapOn ? closeMap() : openMap(); return; }
       if (k === 'f') { e.preventDefault(); focusOn ? closeFocus() : openFocus(); return; }
       if (k === 'n') { e.preventDefault(); document.getElementById('fTitle').focus(); return; }
       if (!t) return;
