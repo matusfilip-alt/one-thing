@@ -240,6 +240,11 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px;
 .row .t { flex: 1; font-size: 14.5px; min-width: 0; }
 .row .t small { display: block; font-size: 11.5px; color: var(--sub); }
 .row.dn .t { color: var(--faint); }
+.row .d.hollow { background: transparent; border: 2px solid var(--faint); box-sizing: border-box; }
+.row.wait .t { color: var(--sub); }
+.row.wait .t b { color: var(--ink); font-weight: 600; }
+.chaseb { font-size: 11px; font-weight: 600; letter-spacing: .02em; color: #b25000;
+  background: rgba(255,159,10,.16); padding: 3px 9px; border-radius: 980px; }
 .row button { font: inherit; font-size: 12px; padding: 6px 12px; border-radius: 980px; border: 1px solid var(--hair); background: transparent; color: var(--sub); }
 
 .io { display: none; margin-top: 12px; background: var(--card); border-radius: 18px; padding: 18px; }
@@ -471,11 +476,13 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
   <div class="bar">
     <button class="link" id="toggleList">Show all</button>
     <button class="link" id="openMapBtn">Map</button>
+    <button class="link" id="toggleWait">Waiting</button>
     <button class="link" id="toggleIO">Import / export</button>
     <button class="link" id="toggleCalm">Calm mode: off</button>
   </div>
 
   <div class="list" id="list"></div>
+  <div class="list" id="waitList"></div>
 
   <div class="io" id="io">
     <h3>Import from a note</h3>
@@ -659,6 +666,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
         lastRemote = txt;
         if (JSON.stringify(state.tasks) !== before) { saveLocal(); render(); }
       }
+      if (reapWaiting()) render();          // anything whose wait ran out comes back now
       setSync('ok', 'Synced · ' + stamp());
     } catch (e) {
       if (e && /operation-specific reason|decrypt/i.test(String(e.message))) setSync('err', 'Wrong passphrase for this list');
@@ -695,10 +703,11 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
   function touch(t) { t.updatedAt = now(); saveLocal(); render(); schedulePush(); }
 
   /* ══════════ selectors ══════════ */
-  function live(list, ignoreFilter) {
+  function live(list, ignoreFilter, includeWaiting) {
     return Object.keys(state.tasks).map(function (k) { return state.tasks[k]; })
       .filter(function (t) {
         if (!t || t.deleted || t.done || t.list !== list) return false;
+        if (t.waiting && !includeWaiting) return false;      // not your move, so not in the queue
         if (!ignoreFilter && filterArea) {
           var want = filterArea === ' ' ? '' : filterArea;   // ' ' is the untagged bucket
           if ((t.area || '') !== want) return false;
@@ -707,6 +716,45 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       })
       .sort(function (a, b) { return b.priority !== a.priority ? b.priority - a.priority : a.created - b.created; });
   }
+
+  /* ══════════ waiting on someone else ══════════ */
+  function waitingList() {
+    return Object.keys(state.tasks).map(function (k) { return state.tasks[k]; })
+      .filter(function (t) { return t && t.waiting && !t.done && !t.deleted && t.list === current; })
+      .sort(function (a, b) { return (a.waiting.since || 0) - (b.waiting.since || 0); });
+  }
+  function workDaysSince(ts) {
+    var a = new Date(ts), b = new Date();
+    a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0);
+    var n = 0, cur = new Date(a);
+    while (cur < b) { cur.setDate(cur.getDate() + 1); var w = cur.getDay(); if (w !== 0 && w !== 6) n++; }
+    return n;
+  }
+  // a wait that has run its course comes back on its own, one level more urgent, as a chase
+  function reapWaiting() {
+    var changed = false;
+    Object.keys(state.tasks).forEach(function (k) {
+      var t = state.tasks[k];
+      if (!t || !t.waiting || t.done || t.deleted) return;
+      var w = workDaysSince(t.waiting.since);
+      if (w >= (t.waiting.days || 5)) {
+        t.chase = { who: t.waiting.who || '', days: w };
+        t.waiting = null;
+        t.priority = Math.min(10, t.priority + 1);
+        t.updatedAt = now();
+        changed = true;
+      }
+    });
+    if (changed) { saveLocal(); schedulePush(); }
+    return changed;
+  }
+  function startWaiting(t, who, days) {
+    t.waiting = { who: (who || '').trim(), since: now(), days: days || 5 };
+    t.chase = null;
+    if (focusId === t.id) focusId = null;
+    touch(t);
+  }
+  function stopWaiting(t) { t.waiting = null; t.chase = null; touch(t); }
   function topOf(list) {
     var o = live(list); if (!o.length) return null;
     var fresh = o.filter(function (t) { return !(localOnly[t.id] || {}).parked; });
@@ -778,6 +826,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
             (subs.length ? '<span class="sep"></span><span class="prog"><span class="track"><span class="fill" style="width:' + Math.round(doneN / subs.length * 100) + '%"></span></span>' + doneN + '/' + subs.length + '</span>' : '') +
             (m.skips > 1 ? '<span class="sep"></span><span class="muted hot">skipped ' + m.skips + '×</span>' : '') +
             '<span class="sep"></span><span class="abadge" data-area="1">' + escH(t.area || 'no area') + '</span>' +
+            (t.chase ? '<span class="sep"></span><span class="chaseb">chase ' + escH(t.chase.who || 'them') + ' · silent ' + t.chase.days + 'd</span>' : '') +
           '</div>' +
           titleHtml +
           stepHtml +
@@ -790,6 +839,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
           '<span class="tpick"><button class="btn tinted" data-do="timer">15 min</button>' +
             '<button class="mini" data-min="25">25</button><button class="mini" data-min="45">45</button></span>' +
           '<button class="btn quiet" data-do="done">Done</button>' +
+          '<button class="btn quiet" data-do="wait">Waiting on…</button>' +
           '<button class="btn quiet" data-do="skip">Not now</button>' +
           '<button class="btn quiet" data-do="drop">Delete</button>' +
         '</div>' +
@@ -892,7 +942,24 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     el.innerHTML = (html || '<div class="row"><div class="t" style="color:#c7c7cc">Nothing here yet.</div></div>') + recent;
   }
 
-  function render() { renderHero(); renderStats(); renderList(); renderAreas(); if (focusOn) renderFocus(); }
+  function renderWaiting() {
+    var el = document.getElementById('waitList');
+    var w = waitingList();
+    document.getElementById('toggleWait').textContent = 'Waiting' + (w.length ? ' (' + w.length + ')' : '');
+    if (!el.classList.contains('on')) return;
+    if (!w.length) { el.innerHTML = '<div class="row"><div class="t" style="color:#c7c7cc">Nothing is waiting on anyone else.</div></div>'; return; }
+    el.innerHTML = w.map(function (t) {
+      var d = workDaysSince(t.waiting.since), left = Math.max(0, (t.waiting.days || 5) - d);
+      return '<div class="row wait">' +
+        '<div class="d hollow" style="border-color:' + LISTC[t.priority] + '"></div>' +
+        '<div class="t">' + escH(t.title) +
+          '<small>waiting on <b>' + escH(t.waiting.who || 'someone') + '</b> · ' + d + ' working day' + (d === 1 ? '' : 's') +
+          ' · ' + (left ? 'back in ' + left : 'due back now') + '</small></div>' +
+        '<button data-unwait="' + t.id + '">Back</button><button data-wdone="' + t.id + '">Done</button></div>';
+    }).join('');
+  }
+
+  function render() { renderHero(); renderStats(); renderList(); renderAreas(); renderWaiting(); if (focusOn) renderFocus(); }
 
   /* ══════════ generated art ══════════ */
   // same area always produces the same pattern, so each one gets a visual identity you learn
@@ -1041,7 +1108,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
   var ROOT_X = 0, AREA_X = 250, TASK_X = 470, ROW_H = 38, GROUP_GAP = 34;
 
   function buildMap() {
-    var tasks = live(current, true);
+    var tasks = live(current, true, true);   // waiting items included, drawn hollow
     nodes = [];
     var groups = {}, order = [];
     tasks.forEach(function (t) {
@@ -1080,10 +1147,10 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
           var d = days(t.created);
           items2 += '<g class="nodehit' + (mapSel === t.id ? ' nsel' : '') + '" data-task="' + t.id + '">' +
             '<rect x="10" y="' + (ry - 19).toFixed(1) + '" width="380" height="38" rx="9" fill="transparent"/>' +
-            '<circle class="ndot" cx="30" cy="' + ry.toFixed(1) + '" r="' + rad.toFixed(1) + '" fill="' + LISTC[t.priority] + '" stroke="#fff" stroke-width="1.5"/>' +
+            '<circle class="ndot" cx="30" cy="' + ry.toFixed(1) + '" r="' + rad.toFixed(1) + '" fill="' + (t.waiting ? '#fff' : LISTC[t.priority]) + '" stroke="' + (t.waiting ? LISTC[t.priority] : '#fff') + '" stroke-width="' + (t.waiting ? 2.5 : 1.5) + '"/>' +
             '<text class="nurg" x="50" y="' + ry.toFixed(1) + '" dy="0.35em" fill="' + LISTC[t.priority] + '">' + t.priority + '</text>' +
             '<text class="nlabel" x="72" y="' + ry.toFixed(1) + '" dy="0.35em">' + escH(title) +
-              '<tspan class="nage"> · ' + (d <= 0 ? 'today' : d + 'd') + '</tspan></text></g>';
+              '<tspan class="nage"> · ' + (t.waiting ? 'waiting on ' + escH(t.waiting.who || 'someone') : (d <= 0 ? 'today' : d + 'd')) + '</tspan></text></g>';
           nodes.push({ x: 72 + title.length * 7.4 + 30, y: ry });
           cy2 += 40;
         });
@@ -1128,10 +1195,10 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
         items += '<g class="nodehit' + (mapSel === t.id ? ' nsel' : '') + '" data-task="' + t.id + '">' +
           '<rect x="' + (TASK_X - 18) + '" y="' + (r.y - ROW_H / 2 + 3).toFixed(1) + '" width="430" height="' + (ROW_H - 6) + '" rx="9" fill="transparent"/>' +
           '<circle class="ndot" cx="' + TASK_X + '" cy="' + r.y.toFixed(1) + '" r="' + rad.toFixed(1) +
-            '" fill="' + LISTC[t.priority] + '" stroke="#fff" stroke-width="1.5"/>' +
+            '" fill="' + (t.waiting ? '#fff' : LISTC[t.priority]) + '" stroke="' + (t.waiting ? LISTC[t.priority] : '#fff') + '" stroke-width="' + (t.waiting ? 2.5 : 1.5) + '"/>' +
           '<text class="nurg" x="' + (TASK_X + 20) + '" y="' + r.y.toFixed(1) + '" dy="0.35em" fill="' + LISTC[t.priority] + '">' + t.priority + '</text>' +
           '<text class="nlabel" x="' + (TASK_X + 42) + '" y="' + r.y.toFixed(1) + '" dy="0.35em">' + escH(title) +
-            '<tspan class="nage"> · ' + (d <= 0 ? 'today' : d + 'd') + '</tspan></text>' +
+            '<tspan class="nage"> · ' + (t.waiting ? 'waiting on ' + escH(t.waiting.who || 'someone') : (d <= 0 ? 'today' : d + 'd')) + '</tspan></text>' +
           '</g>';
         nodes.push({ x: TASK_X + 42 + title.length * 7.4 + 46, y: r.y });
         nodes.push({ x: TASK_X - 20, y: r.y });
@@ -1273,7 +1340,8 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
         if (st) { last.subs.push({ text: st, done: sd }); last.updatedAt = now(); }
         return;
       }
-      var area = '';
+      var area = '', waitWho = null;
+      line = line.replace(/\s+@([^\s]{1,30})\s*$/, function (_, w) { waitWho = w.replace(/_/g, ' '); return ''; });
       line = line.replace(/\s+#([a-z0-9_-]{1,20})\s*$/i, function (_, a) { area = a.toLowerCase(); return ''; });
       var mm = line.match(/^(\d{1,2})\s*[·•.\-–—|:)]\s*(.+)$/);
       var prio = mm ? clampP(mm[1]) : 5;
@@ -1283,6 +1351,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       var dup = live(section, true).find(function (x) { return x.title.toLowerCase() === title.toLowerCase(); });
       if (dup) { last = dup; return; }
       last = addTask(title, (parts[1] || '').trim(), prio, section, [], area);
+      if (waitWho) last.waiting = { who: waitWho, since: now(), days: 5 };
       added++;
     });
     return added;
@@ -1291,8 +1360,9 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     var out = ['One Thing', ''];
     ['work', 'personal'].forEach(function (list) {
       out.push(list === 'work' ? 'WORK' : 'PERSONAL');
-      live(list, true).forEach(function (t) {
-        out.push(t.priority + ' · ' + t.title + (t.step ? ' » ' + t.step : '') + (t.area ? ' #' + t.area : ''));
+      live(list, true, true).forEach(function (t) {
+        out.push(t.priority + ' · ' + t.title + (t.step ? ' » ' + t.step : '') + (t.area ? ' #' + t.area : '') +
+                 (t.waiting ? ' @' + (t.waiting.who || 'someone').replace(/\s+/g, '_') : ''));
         (t.subs || []).forEach(function (s) { out.push('- ' + (s.done ? '✓ ' : '') + s.text); });
       });
       out.push('');
@@ -1415,6 +1485,12 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       var a = b.dataset.do;
       if (a === 'done') complete(t.id);
       else if (a === 'focus') openFocus();
+      else if (a === 'wait') {
+        var who = prompt('Waiting on who? (e.g. Juho, Tereza, the bank)', t.chase ? t.chase.who : '');
+        if (who === null) return;
+        var dd = parseInt(prompt('Bring it back after how many working days?', '5'), 10);
+        startWaiting(t, who, (dd > 0 && dd < 200) ? dd : 5);
+      }
       else if (a === 'skip') skip(t.id);
       else if (a === 'up') nudge(t.id, 1);
       else if (a === 'down') nudge(t.id, -1);
@@ -1557,6 +1633,17 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       var l = document.getElementById('list'); l.classList.toggle('on');
       this.textContent = l.classList.contains('on') ? 'Hide all' : 'Show all';
     });
+    document.getElementById('toggleWait').addEventListener('click', function () {
+      document.getElementById('waitList').classList.toggle('on');
+      renderWaiting();
+    });
+    document.getElementById('waitList').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.unwait) { var t = state.tasks[b.dataset.unwait]; if (t) stopWaiting(t); }
+      else if (b.dataset.wdone) complete(b.dataset.wdone);
+      renderWaiting();
+    });
+
     document.getElementById('toggleIO').addEventListener('click', function () {
       var io = document.getElementById('io');
       io.classList.toggle('on');
@@ -1645,6 +1732,7 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     storeKey = d.storeKey; cryptoKey = d.cryptoKey;
     if (remember) { try { localStorage.setItem(DEVKEY, pass); } catch (e) {} }
     loadLocal();
+    reapWaiting();
     document.getElementById('lock').classList.add('hide');
     document.getElementById('app').classList.remove('hide');
     wire(); applyCalm(); render();
