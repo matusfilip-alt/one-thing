@@ -244,10 +244,12 @@ body.dark-flash #flashWhy i { color: #fff; }
 body.dark-flash #flashWhy b { color: rgba(242,242,244,.32); }
 @keyframes pop { from { transform: scale(.55); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+#confetti { position: fixed; inset: 0; z-index: 100; pointer-events: none; display: none; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
 </head>
 <body>
+<canvas id="confetti"></canvas>
 <div id="flash"><div class="ring"></div><div id="flashWhy"></div></div>
 <div id="focus"></div>
 
@@ -903,8 +905,58 @@ body.dark-flash #flashWhy b { color: rgba(242,242,244,.32); }
   function openFocus(id) { if (id) focusId = id; focusOn = true; renderFocus(); }
   function closeFocus() { focusOn = false; focusId = null; document.getElementById('focus').className = ''; }
 
+  /* ══════════ confetti ══════════ */
+  // two cannons from the bottom corners, angled inward so they frame the card rather than cover it
+  function confetti() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var cv = document.getElementById('confetti');
+    if (!cv || !cv.getContext) return;
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    var W = cv.width = Math.floor(window.innerWidth * dpr);
+    var H = cv.height = Math.floor(window.innerHeight * dpr);
+    cv.style.display = 'block';
+    var ctx = cv.getContext('2d');
+    var COLORS = ['#30b866', '#ff3b30', '#ff9f0a', '#ffd60a', '#5ac8fa', '#af52de'];
+    var P = [];
+    function shoot(x, ang) {
+      for (var i = 0; i < 70; i++) {
+        var a = ang + (Math.random() - 0.5) * 0.85;
+        var sp = (13 + Math.random() * 15) * dpr;
+        P.push({
+          x: x, y: H * 1.02, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+          w: (5 + Math.random() * 6) * dpr, h: (8 + Math.random() * 9) * dpr,
+          r: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.32,
+          c: COLORS[(Math.random() * COLORS.length) | 0], life: 1
+        });
+      }
+    }
+    shoot(W * 0.12, -Math.PI / 3);          // bottom left, firing up and right
+    shoot(W * 0.88, -Math.PI * 2 / 3);      // bottom right, firing up and left
+    var g = 0.42 * dpr, t0 = performance.now();
+    (function frame(now) {
+      var el = now - t0, alive = 0;
+      ctx.clearRect(0, 0, W, H);
+      for (var i = 0; i < P.length; i++) {
+        var p = P[i];
+        p.vy += g; p.vx *= 0.992; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        if (el > 1500) p.life -= 0.022;
+        if (p.life <= 0) continue;
+        if (p.y < H + 80) alive++;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.translate(p.x, p.y); ctx.rotate(p.r);
+        ctx.fillStyle = p.c;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+      if (alive && el < 4200) requestAnimationFrame(frame);
+      else { ctx.clearRect(0, 0, W, H); cv.style.display = 'none'; }
+    })(t0);
+  }
+
   /* ══════════ flash ══════════ */
   function flash(why) {
+    confetti();
     var f = document.getElementById('flash');
     document.getElementById('flashWhy').innerHTML = why ? '<b>One less thing between you and</b><i>' + escH(why) + '</i>' : '';
     document.body.classList.toggle('dark-flash', focusOn);
