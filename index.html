@@ -18,16 +18,17 @@
   --hair: rgba(0,0,0,0.07); --green: #30b866; --red: #ff3b30; --r: 22px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html { -webkit-font-smoothing: antialiased; }
+html, body { height: 100%; }
 body {
   background: var(--bg); color: var(--ink); font-size: 15px; line-height: 1.5;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overflow: hidden;
 }
-.wrap { max-width: 780px; margin: 0 auto; padding: 28px 18px 60px; }
 .hide { display: none !important; }
 
-/* ── lock screen ── */
+/* lock */
 #lock { max-width: 420px; margin: 0 auto; padding: 60px 20px; }
 #lock .mark { width: 54px; height: 54px; margin: 0 auto 26px; position: relative; }
 #lock .mark i { position: absolute; left: 21px; top: 4px; width: 12px; height: 30px; border-radius: 6px; background: var(--red); display: block; }
@@ -39,12 +40,12 @@ body {
 #lock input:focus { outline: none; border-color: var(--sub); }
 #lock button { font: inherit; font-size: 15px; font-weight: 500; width: 100%; margin-top: 10px; padding: 14px;
   border-radius: 980px; border: none; background: var(--ink); color: #fff; cursor: pointer; }
-#lock button:disabled { opacity: .4; }
 #lock .warn { font-size: 12.5px; color: var(--red); text-align: center; margin-top: 12px; min-height: 18px; }
 #lock .fine { font-size: 12px; color: var(--faint); text-align: center; margin-top: 22px; line-height: 1.5; }
 
-/* ── header ── */
-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 8px; flex-wrap: wrap; }
+/* app shell */
+#app { display: flex; flex-direction: column; height: 100%; }
+header { display: flex; align-items: center; gap: 12px; padding: 14px 18px 8px; flex-wrap: wrap; }
 .brand { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
 .brand em { font-style: normal; color: var(--faint); font-weight: 400; }
 .seg { display: inline-flex; background: rgba(120,120,128,.10); border-radius: 11px; padding: 2px; gap: 2px; }
@@ -52,247 +53,93 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   cursor: pointer; padding: 7px 16px; border-radius: 9px; transition: color .25s, background .25s, box-shadow .25s; }
 .seg button.on { background: var(--card); color: var(--ink); font-weight: 590; box-shadow: 0 1px 3px rgba(0,0,0,.10), 0 0 1px rgba(0,0,0,.10); }
 .seg .n { color: var(--faint); margin-left: 6px; font-weight: 400; font-variant-numeric: tabular-nums; }
+header .sp { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.sync { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--faint); }
+.sync .led { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.sync.busy .led { background: #ff9f0a; animation: blip 1s ease-in-out infinite; }
+.sync.err .led { background: var(--red); } .sync.err { color: var(--red); }
+@keyframes blip { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+.link { font: inherit; font-size: 13px; font-weight: 500; color: var(--sub); background: none; border: none; cursor: pointer; padding: 4px 0; }
+.link:hover { color: var(--ink); }
 
-/* areas */
-.areas { display: flex; gap: 6px; flex-wrap: wrap; margin: 2px 0 14px; }
-.chip {
-  font: inherit; font-size: 12.5px; font-weight: 500; padding: 6px 13px; border-radius: 980px;
-  border: 1px solid var(--hair); background: var(--card); color: var(--sub); cursor: pointer;
-  transition: all .2s cubic-bezier(.2,.8,.3,1); white-space: nowrap;
-}
-.chip:hover { border-color: var(--faint); color: var(--ink); }
+.areas { display: flex; gap: 6px; flex-wrap: wrap; padding: 4px 18px 10px; }
+.chip { font: inherit; font-size: 12.5px; font-weight: 500; padding: 5px 12px; border-radius: 980px;
+  border: 1px solid var(--hair); background: var(--card); color: var(--sub); cursor: pointer; transition: all .2s; white-space: nowrap; }
+.chip:hover { color: var(--ink); }
 .chip.on { background: var(--ink); border-color: var(--ink); color: #fff; }
 .chip .c { opacity: .5; margin-left: 5px; font-variant-numeric: tabular-nums; }
 .chip.add { border-style: dashed; color: var(--faint); }
-.areapick { display: flex; gap: 6px; flex-wrap: wrap; padding: 4px 0 14px; align-items: center; }
-.areapick .lab { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--faint); margin-right: 4px; }
-.abadge { font-size: 11px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--sub);
-  background: rgba(120,120,128,.10); padding: 3px 9px; border-radius: 980px; cursor: pointer; }
-.abadge:hover { color: var(--ink); }
 
-.sync { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; font-size: 12px; color: var(--faint); }
-.sync .led { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
-.sync.busy .led { background: #ff9f0a; animation: blip 1s ease-in-out infinite; }
-.sync.err .led { background: var(--red); }
-.sync.err { color: var(--red); }
+/* board */
+#board { flex: 1; display: flex; gap: 14px; padding: 4px 18px 18px; overflow-x: auto; overflow-y: hidden; align-items: stretch; }
+.col { flex: 1 1 0; min-width: 232px; display: flex; flex-direction: column; background: rgba(120,120,128,.07); border-radius: 16px; }
+.col.over { background: rgba(120,120,128,.16); outline: 2px dashed var(--faint); outline-offset: -4px; }
+.colhead { display: flex; align-items: center; gap: 8px; padding: 12px 14px 8px; }
+.colhead h2 { font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--sub); }
+.colhead .cnt { font-size: 12px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.colhead .over3 { color: var(--red); font-weight: 700; }
+.colhead .add { margin-left: auto; font: inherit; font-size: 17px; line-height: 1; width: 24px; height: 24px; border-radius: 50%;
+  border: none; background: transparent; color: var(--faint); cursor: pointer; }
+.colhead .add:hover { color: var(--ink); background: rgba(120,120,128,.12); }
+.colbody { flex: 1; overflow-y: auto; padding: 2px 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.colbody::-webkit-scrollbar { width: 6px; } .colbody::-webkit-scrollbar-thumb { background: rgba(0,0,0,.14); border-radius: 3px; }
 
-/* ── hero ── */
-#hero.in { animation: rise .45s cubic-bezier(.2,.8,.3,1); }
-@keyframes rise { from { opacity: 0; transform: translateY(8px) scale(.995); } to { opacity: 1; transform: none; } }
-.hero {
-  --u: #ff8a80; --ut: #c7584f; --glow0: rgba(0,0,0,0); --glow1: rgba(0,0,0,0); --tint: transparent;
-  --ringdur: 3.2s; --tdur: 10s; --amp: 3px;
-  position: relative; background: linear-gradient(var(--tint), var(--tint)), var(--card); border-radius: var(--r);
-  padding: 34px 26px 26px; min-height: 330px; display: flex; flex-direction: column; justify-content: space-between;
-  box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 28px rgba(0,0,0,.05);
+.card { background: var(--card); border-radius: 12px; padding: 11px 12px; cursor: pointer; position: relative;
+  box-shadow: 0 1px 2px rgba(0,0,0,.06); transition: box-shadow .18s, transform .12s; border-left: 3px solid transparent; }
+.card:hover { box-shadow: 0 3px 10px rgba(0,0,0,.10); }
+.card:active { transform: scale(.99); }
+.card.dragging { opacity: .4; }
+.card .ct { font-size: 14.5px; line-height: 1.35; letter-spacing: -.01em; word-break: break-word; }
+.card .cm { display: flex; align-items: center; gap: 8px; margin-top: 7px; font-size: 11.5px; color: var(--faint); flex-wrap: wrap; }
+.card .adot { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); flex: 0 0 7px; }
+.card .prog { font-variant-numeric: tabular-nums; }
+.card .hot { color: var(--red); }
+.card.done .ct { color: var(--faint); text-decoration: line-through; }
+.card .mv { position: absolute; top: 8px; right: 8px; font: inherit; font-size: 13px; line-height: 1; width: 26px; height: 26px;
+  border-radius: 7px; border: none; background: rgba(120,120,128,.10); color: var(--sub); cursor: pointer; display: none; }
+.card .mvrow { display: none; gap: 5px; margin-top: 9px; flex-wrap: wrap; }
+.card.moving .mvrow { display: flex; }
+.card .mvrow button { font: inherit; font-size: 11.5px; padding: 5px 9px; border-radius: 7px; border: 1px solid var(--hair);
+  background: transparent; color: var(--sub); cursor: pointer; }
+.card .mvrow button.cur { background: var(--ink); color: #fff; border-color: var(--ink); }
+.chaseb { font-size: 11px; font-weight: 600; color: #b25000; background: rgba(255,159,10,.18); padding: 2px 7px; border-radius: 980px; }
+
+.addbox { background: var(--card); border-radius: 12px; padding: 4px 10px; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+.addbox input { font: inherit; font-size: 14.5px; width: 100%; border: none; background: transparent; padding: 9px 2px; color: var(--ink); }
+.addbox input:focus { outline: none; }
+
+/* mobile: one column at a time */
+.tabs { display: none; gap: 6px; padding: 2px 18px 10px; overflow-x: auto; }
+.tabs button { font: inherit; font-size: 12.5px; font-weight: 600; padding: 7px 13px; border-radius: 980px; white-space: nowrap;
+  border: 1px solid var(--hair); background: var(--card); color: var(--sub); cursor: pointer; }
+.tabs button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.tabs .c { opacity: .55; margin-left: 5px; font-variant-numeric: tabular-nums; }
+@media (max-width: 780px) {
+  .tabs { display: flex; }
+  #board { padding: 0 12px 12px; }
+  .col { min-width: 100%; }
+  .col.mhide { display: none; }
+  .card .mv { display: block; }
+  .card .ct { padding-right: 26px; }
 }
-.hero::after { content: ""; position: absolute; inset: 0; border-radius: var(--r); border: 1.5px solid transparent; pointer-events: none; }
-.hero.edge::after { border-color: var(--u); }
-.hero.edge .title, .hero.edge .lvl .num, .hero.edge .lvl .txt { color: var(--ut); }
-.hero.ring { animation: pulse var(--ringdur) cubic-bezier(.4,0,.2,1) infinite; }
-.hero.ring.tremor { animation: pulse var(--ringdur) cubic-bezier(.4,0,.2,1) infinite, tremor var(--tdur) ease-in-out 2s infinite; }
-@keyframes pulse {
-  0%   { box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 28px rgba(0,0,0,.05), 0 0 0 0 var(--glow0); }
-  70%  { box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 28px rgba(0,0,0,.05), 0 0 0 16px var(--glow1); }
-  100% { box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 28px rgba(0,0,0,.05), 0 0 0 0 var(--glow1); }
-}
-@keyframes tremor {
-  0%, 90%, 100% { transform: translateX(0); }
-  91.5% { transform: translateX(calc(var(--amp) * -1)); }
-  93%   { transform: translateX(var(--amp)); }
-  94.5% { transform: translateX(calc(var(--amp) * -0.66)); }
-  96%   { transform: translateX(calc(var(--amp) * 0.66)); }
-  97.5% { transform: translateX(calc(var(--amp) * -0.3)); }
-  99%   { transform: translateX(0); }
-}
-body.calm .hero { animation: none !important; }
-/* the moment a sprint starts, everything goes still: motion means "not working yet" */
-body.working .hero { animation: none !important; }
-body.working .hero.edge::after { border-color: var(--u); opacity: .55; }
-body.working .lvl .dot { animation: none; }
 
-.hero > div:first-child { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-.meta { display: flex; align-items: center; justify-content: center; gap: 11px; flex-wrap: wrap; margin-bottom: 18px; }
-.lvl { display: inline-flex; align-items: center; gap: 8px; }
-.lvl .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--u); animation: blip 1.5s ease-in-out infinite; }
-body.calm .lvl .dot { animation: none; }
-@keyframes blip { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .3; transform: scale(.75); } }
-.lvl .num { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.lvl .txt { font-size: 12.5px; font-weight: 500; }
-.step2 { display: inline-flex; gap: 4px; }
-.step2 button { font: inherit; font-size: 14px; line-height: 1; width: 26px; height: 26px; border-radius: 50%;
-  border: 1px solid var(--hair); background: transparent; color: var(--sub); cursor: pointer; }
-.sep { width: 1px; height: 11px; background: var(--hair); }
-.muted { font-size: 12px; color: var(--sub); }
-.muted.hot { color: var(--red); }
-.prog { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--sub); font-variant-numeric: tabular-nums; }
-.prog .track { width: 44px; height: 3px; border-radius: 2px; background: rgba(120,120,128,.20); overflow: hidden; }
-.prog .fill { height: 100%; background: var(--green); border-radius: 2px; transition: width .45s cubic-bezier(.2,.8,.3,1); }
+footer { padding: 0 18px 10px; font-size: 11.5px; color: var(--faint); display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
 
-.title { font-size: clamp(26px, 7vw, 40px); font-weight: 600; line-height: 1.08; letter-spacing: -.028em; word-break: break-word; max-width: 20ch; }
-.first { margin-top: 18px; display: flex; gap: 12px; align-items: flex-start; background: rgba(120,120,128,.06);
-  border-radius: 13px; padding: 12px 15px; text-align: left; margin-inline: auto; }
-.first .k { font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--sub); white-space: nowrap; padding-top: 2px; }
-
-.subs { margin-top: 18px; text-align: left; margin-inline: auto; width: fit-content; min-width: min(280px, 100%); max-width: 100%; }
-.sub { display: flex; align-items: flex-start; gap: 4px; width: 100%; border-radius: 10px; margin-left: -8px; }
-.subtog { display: flex; align-items: flex-start; gap: 11px; flex: 1; min-width: 0; text-align: left; font: inherit; font-size: 15px;
-  background: none; border: none; cursor: pointer; padding: 9px 4px 9px 8px; border-radius: 10px; color: var(--ink); }
-.sub .box { flex: 0 0 19px; width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid var(--faint); margin-top: 2px; position: relative; transition: background .2s, border-color .2s; }
-.sub.on .box { background: var(--green); border-color: var(--green); }
-.sub.on .box::after { content: ""; position: absolute; left: 6px; top: 3px; width: 5px; height: 9px;
-  border: solid #fff; border-width: 0 1.6px 1.6px 0; transform: rotate(43deg); animation: tick .28s cubic-bezier(.2,1.3,.4,1); }
-@keyframes tick { from { opacity: 0; transform: rotate(43deg) scale(.4); } to { opacity: 1; transform: rotate(43deg) scale(1); } }
-.sub.on .lbl { color: var(--faint); text-decoration: line-through; }
-.sub.next .lbl { font-weight: 590; }
-.sub.next .box { border-color: var(--u); border-width: 2px; }
-.subedit { flex: 0 0 30px; align-self: center; background: none; border: none; cursor: pointer; color: var(--faint);
-  font-size: 13px; padding: 8px 6px; border-radius: 8px; opacity: .45; transition: opacity .2s, color .2s; }
-.subedit:hover { opacity: 1; color: var(--ink); }
-
-/* inline editing */
-.editable { cursor: text; }
-.editable:hover { text-decoration: underline; text-decoration-color: var(--faint); text-underline-offset: 5px; text-decoration-thickness: 1px; }
-.edtitle {
-  font: inherit; font-size: clamp(26px, 7vw, 40px); font-weight: 600; line-height: 1.12; letter-spacing: -.028em;
-  color: var(--ut, var(--ink)); text-align: center; width: min(20ch, 100%); background: transparent;
-  border: none; border-bottom: 2px solid var(--u, var(--faint)); padding: 0 0 4px; resize: none; overflow: hidden;
-}
-.edtitle:focus { outline: none; }
-.edstep { font: inherit; font-size: 14.5px; background: transparent; border: none; border-bottom: 1px solid var(--faint);
-  padding: 2px 0; min-width: 200px; color: var(--ink); }
-.edstep:focus { outline: none; border-color: var(--u); }
-.edsub { font: inherit; font-size: 15px; flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--u);
-  padding: 8px 0; color: var(--ink); min-width: 0; }
-.edsub:focus { outline: none; }
-.edhint { font-size: 11px; color: var(--faint); margin-top: 8px; }
-.addstep { font: inherit; font-size: 13px; color: var(--faint); background: none; border: none; cursor: pointer; margin-top: 14px; }
-.addstep:hover { color: var(--sub); }
-.subadd { display: flex; align-items: center; gap: 11px; }
-.subadd .plus { flex: 0 0 19px; width: 19px; height: 19px; border-radius: 50%; border: 1.5px dashed var(--faint); color: var(--faint); font-size: 13px; line-height: 16px; text-align: center; }
-.subadd input { font: inherit; font-size: 15px; border: none; background: transparent; padding: 9px 0; width: 100%; color: var(--ink); }
-.subadd input:focus { outline: none; }
-
-.actions { display: flex; gap: 9px; margin-top: 26px; flex-wrap: wrap; justify-content: center; }
-.btn { font: inherit; font-size: 14px; font-weight: 500; padding: 12px 20px; border-radius: 980px;
-  border: 1px solid var(--hair); background: var(--card); color: var(--ink); cursor: pointer; transition: transform .16s, background .2s; }
-.btn:active { transform: scale(.97); }
-.btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); padding-inline: 28px; }
+/* import / export */
+.io { display: none; position: fixed; inset: 0; z-index: 80; background: rgba(245,245,247,.97); padding: 24px; overflow: auto; }
+.io.on { display: block; }
+.iowrap { max-width: 640px; margin: 0 auto; }
+.io h3 { font-size: 14px; font-weight: 600; margin: 18px 0 4px; }
+.io p { font-size: 12.5px; color: var(--sub); margin-bottom: 10px; }
+.io textarea { font: inherit; font-size: 14px; width: 100%; min-height: 150px; padding: 12px; border: 1px solid var(--hair);
+  border-radius: 12px; background: var(--card); color: var(--ink); resize: vertical; }
+.io textarea:focus { outline: none; border-color: var(--sub); }
+.iorow { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.btn { font: inherit; font-size: 14px; font-weight: 500; padding: 11px 20px; border-radius: 980px;
+  border: 1px solid var(--hair); background: var(--card); color: var(--ink); cursor: pointer; }
+.btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
 .btn.tinted { background: rgba(120,120,128,.09); border-color: transparent; }
 .btn.quiet { background: transparent; border-color: transparent; color: var(--sub); }
-
-.empty { text-align: center; padding: 60px 16px; }
-.empty h2 { font-size: 26px; font-weight: 600; letter-spacing: -.025em; margin-bottom: 6px; }
-.empty p { color: var(--sub); max-width: 34ch; margin: 0 auto; }
-.empty .mk { width: 42px; height: 42px; margin: 0 auto 16px; border-radius: 50%; border: 1.5px solid var(--green); position: relative; }
-.empty .mk::after { content: ""; position: absolute; left: 13px; top: 11px; width: 11px; height: 19px; border: solid var(--green); border-width: 0 1.5px 1.5px 0; transform: rotate(43deg); }
-
-.timer { margin-top: 12px; background: var(--ink); color: #fff; border-radius: 18px; padding: 16px 22px;
-  display: none; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
-.timer.on { display: flex; }
-.timer .lbl { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; opacity: .55; font-weight: 500; }
-.clock { font-size: 36px; font-weight: 500; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1.1; }
-.timer button { font: inherit; font-size: 13px; padding: 9px 15px; border-radius: 980px; border: 1px solid rgba(255,255,255,.22); background: transparent; color: #fff; cursor: pointer; }
-.timer button:hover { background: rgba(255,255,255,.12); }
-.timer .ctl { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
-.timer input.mins { font: inherit; font-size: 13px; width: 62px; padding: 9px 10px; border-radius: 980px;
-  border: 1px solid rgba(255,255,255,.22); background: transparent; color: #fff; text-align: center; }
-.timer input.mins:focus { outline: none; border-color: rgba(255,255,255,.5); }
-.timer input.mins::placeholder { color: rgba(255,255,255,.4); }
-.timer.over { background: #1d1d1f; }
-.timer.over .clock { color: #9ff0bd; }
-
-/* timer presets on the card */
-.tpick { display: inline-flex; gap: 6px; align-items: center; }
-.tpick button.mini { font: inherit; font-size: 12px; font-weight: 500; padding: 8px 11px; border-radius: 980px;
-  border: 1px solid var(--hair); background: transparent; color: var(--sub); cursor: pointer; }
-.tpick button.mini:hover { color: var(--ink); border-color: var(--faint); }
-
-.stats { display: flex; margin-top: 20px; gap: 1px; background: var(--hair); border-radius: 16px; overflow: hidden; flex-wrap: wrap; }
-.stat { flex: 1; min-width: 45%; background: var(--card); padding: 13px 16px; }
-.stat .v { font-size: 22px; font-weight: 500; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
-.stat .k { font-size: 11px; color: var(--sub); }
-.stat.win .v { color: var(--green); }
-
-.panel { margin-top: 12px; background: var(--card); border-radius: 18px; padding: 6px 18px 18px; }
-.field { border-bottom: 1px solid var(--hair); }
-.field input { font: inherit; font-size: 16px; width: 100%; padding: 14px 0; border: none; background: transparent; color: var(--ink); }
-.field input:focus { outline: none; }
-.urg { display: flex; align-items: center; gap: 18px; padding: 18px 0 16px; }
-.urgnum { font-size: 42px; font-weight: 500; letter-spacing: -.04em; line-height: 1; width: 60px; font-variant-numeric: tabular-nums; color: var(--u, #86868b); }
-.urgbody { flex: 1; min-width: 0; }
-.urgtop { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
-.urglbl { font-size: 13px; font-weight: 500; color: var(--u, #86868b); }
-.urgcap { font-size: 11px; color: var(--faint); }
-input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: 2px;
-  background: linear-gradient(90deg, #d8d8dc 0%, var(--u, #86868b) 100%); outline: none; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%;
-  background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.22), 0 0 0 .5px rgba(0,0,0,.05); }
-.addbtn { width: 100%; }
-
-.bar { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 10px; flex-wrap: wrap; }
-.link { font: inherit; font-size: 13px; font-weight: 500; color: var(--sub); background: none; border: none; cursor: pointer; padding: 6px 0; }
-.list { display: none; margin-top: 10px; background: var(--card); border-radius: 18px; overflow: hidden; }
-.list.on { display: block; }
-.row { display: flex; align-items: center; gap: 12px; padding: 13px 18px; border-bottom: 1px solid var(--hair); }
-.row:last-child { border-bottom: none; }
-.row .d { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--sub); }
-.row .t { flex: 1; font-size: 14.5px; min-width: 0; }
-.row .t small { display: block; font-size: 11.5px; color: var(--sub); }
-.row.dn .t { color: var(--faint); }
-.row .d.hollow { background: transparent; border: 2px solid var(--faint); box-sizing: border-box; }
-.row.wait .t { color: var(--sub); }
-.row.wait .t b { color: var(--ink); font-weight: 600; }
-.chaseb { font-size: 11px; font-weight: 600; letter-spacing: .02em; color: #b25000;
-  background: rgba(255,159,10,.16); padding: 3px 9px; border-radius: 980px; }
-.row button { font: inherit; font-size: 12px; padding: 6px 12px; border-radius: 980px; border: 1px solid var(--hair); background: transparent; color: var(--sub); }
-
-.io { display: none; margin-top: 12px; background: var(--card); border-radius: 18px; padding: 18px; }
-.io.on { display: block; }
-.io h3 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-.io p { font-size: 12.5px; color: var(--sub); margin-bottom: 12px; }
-.io textarea { font: inherit; font-size: 14px; width: 100%; min-height: 130px; padding: 12px; border: 1px solid var(--hair);
-  border-radius: 12px; background: var(--bg); color: var(--ink); resize: vertical; }
-.io textarea:focus { outline: none; border-color: var(--sub); }
-.io .iorow { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-
-/* ══ map: everything at one glance ══ */
-#map { position: fixed; inset: 0; z-index: 88; display: none; flex-direction: column; background: var(--bg);
-  padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 16px); }
-#map.on { display: flex; animation: fin .3s cubic-bezier(.2,.8,.3,1); }
-.mtop { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-.mtitle { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
-.mtop .sp { margin-left: auto; display: flex; gap: 6px; }
-.mbtn { font: inherit; font-size: 12.5px; font-weight: 500; padding: 7px 13px; border-radius: 980px;
-  border: 1px solid var(--hair); background: var(--card); color: var(--sub); cursor: pointer; }
-.mbtn:hover { color: var(--ink); border-color: var(--faint); }
-#mapSvg { flex: 1; width: 100%; touch-action: none; cursor: grab; user-select: none; }
-#mapSvg.drag { cursor: grabbing; }
-#mapSvg text { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; }
-.nodehit { cursor: pointer; }
-.nodehit:hover rect { fill: rgba(120,120,128,.09); }
-.nodehit:hover .ndot { stroke: var(--ink); stroke-width: 2.5; }
-.nlabel { font-size: 14px; fill: #2c2c2e; letter-spacing: -.01em; }
-.nage { fill: var(--faint); font-size: 12px; }
-.nurg { font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.narea { font-size: 15px; font-weight: 600; fill: var(--ink); letter-spacing: -.01em; }
-.nareacount { font-size: 14px; font-weight: 600; fill: var(--sub); font-variant-numeric: tabular-nums; }
-.nroot { font-size: 16px; font-weight: 600; fill: #fff; letter-spacing: .03em; }
-.nsel rect { fill: rgba(120,120,128,.13); }
-.nsel .ndot { stroke: var(--ink); stroke-width: 3; }
-.mlink { fill: none; stroke: rgba(0,0,0,.13); }
-.mhint { text-align: center; font-size: 12px; color: var(--faint); padding-top: 6px; }
-
-.msheet { background: var(--card); border-radius: 18px; padding: 15px 18px; margin-top: 8px;
-  box-shadow: 0 2px 20px rgba(0,0,0,.08); display: none; }
-.msheet.on { display: block; animation: rise .25s cubic-bezier(.2,.8,.3,1); }
-.msheet .mst { font-size: 17px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 3px; }
-.msheet .msm { font-size: 12px; color: var(--sub); margin-bottom: 12px; }
-.msheet .msrow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.msheet .urgbig { font-size: 26px; font-weight: 500; font-variant-numeric: tabular-nums; width: 38px; text-align: center; letter-spacing: -.03em; }
-.msheet .rnd { font: inherit; font-size: 17px; line-height: 1; width: 36px; height: 36px; border-radius: 50%;
-  border: 1px solid var(--hair); background: transparent; color: var(--sub); cursor: pointer; }
-.msheet .rnd:hover { color: var(--ink); border-color: var(--faint); }
 
 /* ══ focus mode: the task, and nothing else ══ */
 #focus {
@@ -394,113 +241,65 @@ body.dark-flash #flashWhy i { color: #fff; }
 body.dark-flash #flashWhy b { color: rgba(242,242,244,.32); }
 @keyframes pop { from { transform: scale(.55); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--faint); }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
 </head>
 <body>
 <div id="flash"><div class="ring"></div><div id="flashWhy"></div></div>
 <div id="focus"></div>
-<div id="map">
-  <div class="mtop">
-    <span class="mtitle" id="mapTitle">Map</span>
-    <span class="sp">
-      <button class="mbtn" data-m="zin">+</button>
-      <button class="mbtn" data-m="zout">−</button>
-      <button class="mbtn" data-m="fit">Fit</button>
-      <button class="mbtn" data-m="close">Close</button>
-    </span>
-  </div>
-  <svg id="mapSvg"></svg>
-  <div class="msheet" id="mSheet"></div>
-  <div class="mhint">Tap a task to re-rank it or open it in focus</div>
-</div>
 
 <div id="lock">
   <div class="mark"><i></i><s></s></div>
   <h1>One Thing</h1>
-  <p>Enter your passphrase to unlock your list.</p>
+  <p>Enter your passphrase to unlock your board.</p>
   <input id="pw" type="password" placeholder="Passphrase" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
   <button id="unlock">Unlock</button>
   <div class="warn" id="lockWarn"></div>
-  <div class="fine">The same passphrase on your laptop and phone opens the same list.<br>It never leaves this device. Nobody can reset it.</div>
+  <div class="fine">The same passphrase on your laptop and phone opens the same board.<br>It never leaves this device. Nobody can reset it.</div>
 </div>
 
-<div class="wrap hide" id="app">
+<div id="app" class="hide">
   <header>
     <div class="brand">One&nbsp;<em>Thing</em></div>
     <div class="seg">
       <button class="on" data-list="work">Work<span class="n" id="nwork">0</span></button>
       <button data-list="personal">Personal<span class="n" id="npersonal">0</span></button>
     </div>
+    <div class="sp">
+      <span class="sync" id="sync"><span class="led"></span><span id="syncTxt">Connecting…</span></span>
+      <button class="link" id="focusBtn">Focus</button>
+      <button class="link" id="ioBtn">More</button>
+    </div>
   </header>
 
   <div class="areas" id="areaFilter"></div>
-
-  <div class="sync" id="sync"><span class="led"></span><span id="syncTxt">Connecting…</span></div>
-
-  <div id="hero"></div>
-
-  <div class="timer" id="timer">
-    <div><div class="lbl" id="timerlbl">Sprint</div><div class="clock" id="clock">15:00</div></div>
-    <div class="ctl">
-      <button data-set="15">15</button><button data-set="25">25</button><button data-set="45">45</button>
-      <input class="mins" id="tCustom" placeholder="min" inputmode="numeric" maxlength="3">
-      <button id="tplus">+5</button><button id="tstop">Stop</button>
-    </div>
-  </div>
-
-  <div class="stats">
-    <div class="stat win"><div class="v" id="stDone">0</div><div class="k">Done today</div></div>
-    <div class="stat"><div class="v" id="stOpen">0</div><div class="k">Open</div></div>
-    <div class="stat"><div class="v" id="stFocusD">0m</div><div class="k">Focused today</div></div>
-    <div class="stat"><div class="v" id="stWeek">0</div><div class="k">Done this week</div></div>
-    <div class="stat"><div class="v" id="stFocusW">0m</div><div class="k">Focused this week</div></div>
-    <div class="stat"><div class="v" id="stOld">0</div><div class="k">Oldest · days</div></div>
-  </div>
-
-  <div class="panel">
-    <div class="field"><input id="fTitle" placeholder="What is it?" maxlength="140"></div>
-    <div class="field"><input id="fStep" placeholder="First physical action" maxlength="140"></div>
-    <div class="areapick" id="areaPick"></div>
-    <div class="urg" id="urgWrap">
-      <div class="urgnum" id="urgNum">5</div>
-      <div class="urgbody">
-        <div class="urgtop"><span class="urglbl" id="urgLbl">Should do</span><span class="urgcap">Urgency 1 – 10</span></div>
-        <input type="range" min="1" max="10" step="1" value="5" id="urgRange">
-      </div>
-    </div>
-    <button class="btn tinted addbtn" id="addBtn">Add to <span id="addWhere">work</span></button>
-  </div>
-
-  <div class="bar">
-    <button class="link" id="toggleList">Show all</button>
-    <button class="link" id="openMapBtn">Map</button>
-    <button class="link" id="toggleWait">Waiting</button>
-    <button class="link" id="toggleIO">Import / export</button>
-    <button class="link" id="toggleCalm">Calm mode: off</button>
-  </div>
-
-  <div class="list" id="list"></div>
-  <div class="list" id="waitList"></div>
-
-  <div class="io" id="io">
-    <h3>Import from a note</h3>
-    <p>Paste a list in the One Thing format. Tasks are added, nothing is deleted.</p>
-    <textarea id="ioBox" placeholder="WORK&#10;8 · task » first step&#10;- subtask&#10;&#10;PERSONAL&#10;7 · something"></textarea>
-    <div class="iorow">
-      <button class="btn primary" id="ioLoad">Import</button>
-      <button class="btn tinted" id="ioCopy">Copy list out</button>
-      <button class="btn quiet" id="forget">Lock this device</button>
-    </div>
-    <h3 style="margin-top:22px">What this is all for</h3>
-    <p>One reason per line. These show in focus mode and when you finish something.</p>
-    <textarea id="whyBox" style="min-height:110px"></textarea>
-    <div class="iorow"><button class="btn tinted" id="whySave">Save reasons</button></div>
-  </div>
-
-  <footer>Encrypted · synced across your devices</footer>
+  <div class="tabs" id="tabs"></div>
+  <div id="board"></div>
+  <footer>
+    <span id="tip">Drag cards between columns · click a card to focus it</span>
+  </footer>
 </div>
+
+<div class="io" id="io"><div class="iowrap">
+  <div class="iorow"><button class="btn quiet" id="ioClose">← Back to board</button></div>
+  <h3>Import</h3>
+  <p>Paste a list. Lines go to Inbox. <code>WORK</code> / <code>PERSONAL</code> headings and <code>- subtask</code> lines are understood.</p>
+  <textarea id="ioBox" placeholder="WORK&#10;call the accountant&#10;- find last invoice&#10;- send it&#10;&#10;PERSONAL&#10;book the dentist"></textarea>
+  <div class="iorow">
+    <button class="btn primary" id="ioLoad">Import to Inbox</button>
+    <button class="btn tinted" id="ioCopy">Copy board out</button>
+  </div>
+  <h3>What this is all for</h3>
+  <p>One reason per line. These show in focus mode and when you finish something.</p>
+  <textarea id="whyBox" style="min-height:110px"></textarea>
+  <div class="iorow"><button class="btn tinted" id="whySave">Save reasons</button></div>
+  <h3>This device</h3>
+  <div class="iorow">
+    <button class="btn quiet" id="toggleCalm">Calm mode: off</button>
+    <button class="btn quiet" id="clearDone">Clear Done column</button>
+    <button class="btn quiet" id="forget">Lock this device</button>
+  </div>
+</div></div>
 
 <script>
 (function () {
@@ -508,8 +307,8 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 
   /* ══════════ config ══════════ */
   var STORE = 'https://textdb.dev/api/data/';
-  var LOCAL = 'onething_sync_v1';       // { storeKey: {state, rev} }
-  var DEVKEY = 'onething_device_v1';    // { storeKey } remembered passphrase-derived id
+  var LOCAL = 'onething_sync_v1';
+  var DEVKEY = 'onething_device_v1';
   var PULL_MS = 12000;
 
   /* ══════════ crypto ══════════ */
@@ -702,265 +501,6 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
 
   function touch(t) { t.updatedAt = now(); saveLocal(); render(); schedulePush(); }
 
-  /* ══════════ selectors ══════════ */
-  function live(list, ignoreFilter, includeWaiting) {
-    return Object.keys(state.tasks).map(function (k) { return state.tasks[k]; })
-      .filter(function (t) {
-        if (!t || t.deleted || t.done || t.list !== list) return false;
-        if (t.waiting && !includeWaiting) return false;      // not your move, so not in the queue
-        if (!ignoreFilter && filterArea) {
-          var want = filterArea === ' ' ? '' : filterArea;   // ' ' is the untagged bucket
-          if ((t.area || '') !== want) return false;
-        }
-        return true;
-      })
-      .sort(function (a, b) { return b.priority !== a.priority ? b.priority - a.priority : a.created - b.created; });
-  }
-
-  /* ══════════ waiting on someone else ══════════ */
-  function waitingList() {
-    return Object.keys(state.tasks).map(function (k) { return state.tasks[k]; })
-      .filter(function (t) { return t && t.waiting && !t.done && !t.deleted && t.list === current; })
-      .sort(function (a, b) { return (a.waiting.since || 0) - (b.waiting.since || 0); });
-  }
-  function workDaysSince(ts) {
-    var a = new Date(ts), b = new Date();
-    a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0);
-    var n = 0, cur = new Date(a);
-    while (cur < b) { cur.setDate(cur.getDate() + 1); var w = cur.getDay(); if (w !== 0 && w !== 6) n++; }
-    return n;
-  }
-  // a wait that has run its course comes back on its own, one level more urgent, as a chase
-  function reapWaiting() {
-    var changed = false;
-    Object.keys(state.tasks).forEach(function (k) {
-      var t = state.tasks[k];
-      if (!t || !t.waiting || t.done || t.deleted) return;
-      var w = workDaysSince(t.waiting.since);
-      if (w >= (t.waiting.days || 5)) {
-        t.chase = { who: t.waiting.who || '', days: w };
-        t.waiting = null;
-        t.priority = Math.min(10, t.priority + 1);
-        t.updatedAt = now();
-        changed = true;
-      }
-    });
-    if (changed) { saveLocal(); schedulePush(); }
-    return changed;
-  }
-  function startWaiting(t, who, days) {
-    t.waiting = { who: (who || '').trim(), since: now(), days: days || 5 };
-    t.chase = null;
-    if (focusId === t.id) focusId = null;
-    touch(t);
-  }
-  function stopWaiting(t) { t.waiting = null; t.chase = null; touch(t); }
-  function topOf(list) {
-    var o = live(list); if (!o.length) return null;
-    var fresh = o.filter(function (t) { return !(localOnly[t.id] || {}).parked; });
-    return (fresh.length ? fresh : o)[0];
-  }
-  function lo(id) { if (!localOnly[id]) localOnly[id] = { skips: 0, parked: false }; return localOnly[id]; }
-  function doneList() {
-    return Object.keys(state.tasks).map(function (k) { return state.tasks[k]; })
-      .filter(function (t) { return t && t.done && !t.deleted; })
-      .sort(function (a, b) { return (b.completedAt || 0) - (a.completedAt || 0); });
-  }
-  function ageText(d) {
-    if (d <= 0) return 'Added today';
-    if (d === 1) return '1 day';
-    if (d < 7) return d + ' days';
-    if (d < 14) return d + ' days · over a week';
-    if (d < 30) return d + ' days · this is the pattern';
-    return d + ' days · make it smaller';
-  }
-
-  /* ══════════ render ══════════ */
-  function renderHero() {
-    var el = document.getElementById('hero');
-    el.classList.remove('in'); void el.offsetWidth; el.classList.add('in');
-    var t = topOf(current);
-    if (!t) {
-      el.innerHTML = '<div class="hero"><div class="empty"><div class="mk"></div><h2>Nothing left.</h2><p>' +
-        (current === 'work' ? 'Work is clear.' : 'Personal is clear.') + '</p></div></div>';
-      return;
-    }
-    var k = tone(t.priority), d = days(t.created), hot = d >= 7;
-    var subs = t.subs || [], doneN = subs.filter(function (s) { return s.done; }).length;
-    var nextI = subs.findIndex(function (s) { return !s.done; });
-    var m = lo(t.id);
-    var vars = '--u:' + k.color + ';--ut:' + k.text + ';--glow0:' + k.glow0 + ';--glow1:' + k.glow1 +
-               ';--tint:' + k.tint + ';--ringdur:' + k.ringdur + ';--tdur:' + k.tdur + ';--amp:' + k.amp + ';';
-    var ed = editing && editing.id === t.id ? editing : null;
-
-    var subHtml = subs.map(function (s, i) {
-      if (ed && ed.field === 'sub' && ed.index === i) {
-        return '<div class="sub"><span class="box" style="margin:10px 0 0 8px"></span>' +
-          '<input class="edsub" id="edField" value="' + escH(s.text) + '" maxlength="140"></div>';
-      }
-      return '<div class="sub' + (s.done ? ' on' : '') + (i === nextI ? ' next' : '') + '">' +
-        '<button class="subtog" data-sub="' + i + '"><span class="box"></span><span class="lbl">' + escH(s.text) + '</span></button>' +
-        '<button class="subedit" data-subedit="' + i + '" title="Edit or delete">✎</button></div>';
-    }).join('');
-
-    var titleHtml = (ed && ed.field === 'title')
-      ? '<textarea class="edtitle" id="edField" rows="2" maxlength="140">' + escH(t.title) + '</textarea><div class="edhint">Enter to save · Esc to cancel</div>'
-      : '<div class="title editable" data-edit="title" title="Click to rename">' + escH(t.title) + '</div>';
-
-    var stepHtml;
-    if (ed && ed.field === 'step') {
-      stepHtml = '<div class="first"><span class="k">Start by</span><input class="edstep" id="edField" value="' + escH(t.step || '') + '" maxlength="140" placeholder="open the file, call X…"></div>';
-    } else if (t.step) {
-      stepHtml = '<div class="first"><span class="k">Start by</span><span class="editable" data-edit="step">' + escH(t.step) + '</span></div>';
-    } else {
-      stepHtml = '<button class="addstep" data-edit="step">+ add a first physical action</button>';
-    }
-
-    el.innerHTML =
-      '<div class="hero edge ring tremor" style="' + vars + '">' +
-        '<div>' +
-          '<div class="meta">' +
-            '<span class="lvl"><span class="dot"></span><span class="num">' + t.priority + '</span><span class="txt">' + LABEL[t.priority] + '</span></span>' +
-            '<span class="step2"><button data-do="down">−</button><button data-do="up">+</button></span>' +
-            '<span class="sep"></span><span class="muted' + (hot ? ' hot' : '') + '">' + ageText(d) + '</span>' +
-            (subs.length ? '<span class="sep"></span><span class="prog"><span class="track"><span class="fill" style="width:' + Math.round(doneN / subs.length * 100) + '%"></span></span>' + doneN + '/' + subs.length + '</span>' : '') +
-            (m.skips > 1 ? '<span class="sep"></span><span class="muted hot">skipped ' + m.skips + '×</span>' : '') +
-            '<span class="sep"></span><span class="abadge" data-area="1">' + escH(t.area || 'no area') + '</span>' +
-            (t.chase ? '<span class="sep"></span><span class="chaseb">chase ' + escH(t.chase.who || 'them') + ' · silent ' + t.chase.days + 'd</span>' : '') +
-          '</div>' +
-          titleHtml +
-          stepHtml +
-          '<div class="subs">' + subHtml +
-            '<div class="subadd"><span class="plus">+</span><input id="subAdd" placeholder="' + (subs.length ? 'Add another step' : 'Break it into steps') + '" maxlength="140"></div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="actions">' +
-          '<button class="btn primary" data-do="focus">Focus</button>' +
-          '<span class="tpick"><button class="btn tinted" data-do="timer">15 min</button>' +
-            '<button class="mini" data-min="25">25</button><button class="mini" data-min="45">45</button></span>' +
-          '<button class="btn quiet" data-do="done">Done</button>' +
-          '<button class="btn quiet" data-do="wait">Waiting on…</button>' +
-          '<button class="btn quiet" data-do="skip">Not now</button>' +
-          '<button class="btn quiet" data-do="drop">Delete</button>' +
-        '</div>' +
-      '</div>';
-    var sa = document.getElementById('subAdd');
-    if (sa) {
-      sa.addEventListener('keydown', function (e) {
-        if (e.key !== 'Enter') return;
-        e.preventDefault();
-        var v = sa.value.trim(); if (!v) return;
-        sa.value = ''; refocusSub = true;
-        t.subs = t.subs || []; t.subs.push({ text: v, done: false }); touch(t);
-      });
-      if (refocusSub) { refocusSub = false; sa.focus(); }
-    }
-
-    // an open editor gets focus, and commits on Enter or blur
-    var f = document.getElementById('edField');
-    if (f && ed) {
-      f.focus();
-      if (f.setSelectionRange) { try { f.setSelectionRange(f.value.length, f.value.length); } catch (e2) {} }
-      var done = false;
-      var commit = function (save) {
-        if (done) return; done = true;
-        var val = f.value.trim();
-        var task = state.tasks[ed.id];
-        editing = null;
-        if (save && task) {
-          if (ed.field === 'title') { if (val) { task.title = val; touch(task); return; } }
-          else if (ed.field === 'step') { if (val !== (task.step || '')) { task.step = val; touch(task); return; } }
-          else if (ed.field === 'sub') {
-            var s = (task.subs || [])[ed.index];
-            if (s) {
-              if (!val) task.subs.splice(ed.index, 1);       // cleared text removes the step
-              else s.text = val;
-              touch(task); return;
-            }
-          }
-        }
-        render();
-      };
-      f.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') { e.preventDefault(); commit(true); }
-        else if (e.key === 'Escape') { e.preventDefault(); commit(false); }
-      });
-      f.addEventListener('blur', function () { commit(true); });
-    }
-  }
-
-  function renderStats() {
-    var today = new Date(); today.setHours(0, 0, 0, 0);
-    var wk = now() - 7 * 86400000;
-    var dn = doneList();
-    var o = live(current);
-    document.getElementById('stDone').textContent = dn.filter(function (t) { return (t.completedAt || 0) >= today.getTime(); }).length;
-    document.getElementById('stWeek').textContent = dn.filter(function (t) { return (t.completedAt || 0) >= wk; }).length;
-    document.getElementById('stOpen').textContent = o.length;
-    document.getElementById('stOld').textContent = o.length ? Math.max.apply(null, o.map(function (t) { return days(t.created); })) : 0;
-    document.getElementById('stFocusD').textContent = humanMin(focusSecs(today.getTime()));
-    document.getElementById('stFocusW').textContent = humanMin(focusSecs(wk));
-    document.getElementById('nwork').textContent = live('work', true).length;
-    document.getElementById('npersonal').textContent = live('personal', true).length;
-  }
-
-  function renderAreas() {
-    var f = document.getElementById('areaFilter');
-    var list = allAreas();
-    var total = live(current, true).length;
-    var html = '<button class="chip' + (filterArea === '' ? ' on' : '') + '" data-filter="">All<span class="c">' + total + '</span></button>';
-    html += list.map(function (a) {
-      var n = areaCount(a);
-      if (!n && DEFAULT_AREAS.indexOf(a) < 0) return '';
-      return '<button class="chip' + (filterArea === a ? ' on' : '') + '" data-filter="' + escH(a) + '">' + escH(a) + '<span class="c">' + n + '</span></button>';
-    }).join('');
-    var un = areaCount('');
-    if (un) html += '<button class="chip' + (filterArea === ' ' ? ' on' : '') + '" data-filter=" ">untagged<span class="c">' + un + '</span></button>';
-    f.innerHTML = html;
-
-    var p = document.getElementById('areaPick');
-    p.innerHTML = '<span class="lab">Area</span>' +
-      '<button class="chip' + (newArea === '' ? ' on' : '') + '" data-pick="">none</button>' +
-      list.map(function (a) { return '<button class="chip' + (newArea === a ? ' on' : '') + '" data-pick="' + escH(a) + '">' + escH(a) + '</button>'; }).join('') +
-      '<button class="chip add" data-pick="__new">+ new</button>';
-  }
-
-  function renderList() {
-    var el = document.getElementById('list');
-    var html = live(current).map(function (t) {
-      var d = days(t.created), subs = t.subs || [], doneN = subs.filter(function (s) { return s.done; }).length;
-      var m = lo(t.id);
-      return '<div class="row"><div class="d" style="background:' + LISTC[t.priority] + '"></div>' +
-        '<div class="t">' + escH(t.title) + '<small>' + t.priority + ' · ' + LABEL[t.priority] + ' · ' + (d <= 0 ? 'today' : d + 'd') +
-        (subs.length ? ' · ' + doneN + '/' + subs.length + ' steps' : '') +
-        (m.skips > 1 ? ' · skipped ' + m.skips + '×' : '') + '</small></div>' +
-        '<button data-raise="' + t.id + '">Raise</button><button data-done="' + t.id + '">Done</button></div>';
-    }).join('');
-    var recent = doneList().slice(0, 6).map(function (t) {
-      return '<div class="row dn"><div class="d" style="background:#c7c7cc"></div><div class="t">' + escH(t.title) + '</div></div>';
-    }).join('');
-    el.innerHTML = (html || '<div class="row"><div class="t" style="color:#c7c7cc">Nothing here yet.</div></div>') + recent;
-  }
-
-  function renderWaiting() {
-    var el = document.getElementById('waitList');
-    var w = waitingList();
-    document.getElementById('toggleWait').textContent = 'Waiting' + (w.length ? ' (' + w.length + ')' : '');
-    if (!el.classList.contains('on')) return;
-    if (!w.length) { el.innerHTML = '<div class="row"><div class="t" style="color:#c7c7cc">Nothing is waiting on anyone else.</div></div>'; return; }
-    el.innerHTML = w.map(function (t) {
-      var d = workDaysSince(t.waiting.since), left = Math.max(0, (t.waiting.days || 5) - d);
-      return '<div class="row wait">' +
-        '<div class="d hollow" style="border-color:' + LISTC[t.priority] + '"></div>' +
-        '<div class="t">' + escH(t.title) +
-          '<small>waiting on <b>' + escH(t.waiting.who || 'someone') + '</b> · ' + d + ' working day' + (d === 1 ? '' : 's') +
-          ' · ' + (left ? 'back in ' + left : 'due back now') + '</small></div>' +
-        '<button data-unwait="' + t.id + '">Back</button><button data-wdone="' + t.id + '">Done</button></div>';
-    }).join('');
-  }
-
-  function render() { renderHero(); renderStats(); renderList(); renderAreas(); renderWaiting(); if (focusOn) renderFocus(); }
-
   /* ══════════ generated art ══════════ */
   // same area always produces the same pattern, so each one gets a visual identity you learn
   function hash(str) { var h = 5381; for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return Math.abs(h); }
@@ -1024,18 +564,267 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       '</svg>';
   }
 
+
+  /* ══════════ columns ══════════ */
+  var COLS = [
+    { id: 'inbox',   name: 'Inbox' },
+    { id: 'week',    name: 'This Week' },
+    { id: 'today',   name: 'Today' },
+    { id: 'waiting', name: 'Waiting' },
+    { id: 'done',    name: 'Done' }
+  ];
+  var TODAY_CAP = 3;
+  var mobileCol = 'today', movingId = null, addingIn = null;
+
+  // urgency is no longer a number you set; it comes from where the card sits
+  function heatOf(t, idx) {
+    if (t.col === 'today') return idx === 0 ? 10 : (idx === 1 ? 9 : 8);
+    if (t.col === 'week') return 6;
+    if (t.col === 'waiting') return 2;
+    if (t.col === 'done') return 1;
+    return 3;                                  // inbox
+  }
+
+  function migrate() {
+    var changed = false, n = 0;
+    Object.keys(state.tasks).forEach(function (k) {
+      var t = state.tasks[k];
+      if (!t || t.col) return;
+      t.col = t.deleted ? 'inbox' : (t.done ? 'done' : (t.waiting ? 'waiting' : 'inbox'));
+      t.order = t.created || (now() + (n++));
+      t.updatedAt = t.updatedAt || now();
+      changed = true;
+    });
+    if (changed) { saveLocal(); schedulePush(); }
+  }
+
+  function colTasks(col, ignoreFilter) {
+    return Object.keys(state.tasks).map(function (k) { return state.tasks[k]; })
+      .filter(function (t) {
+        if (!t || t.deleted || t.list !== current || t.col !== col) return false;
+        if (!ignoreFilter && filterArea) {
+          var want = filterArea === ' ' ? '' : filterArea;
+          if ((t.area || '') !== want) return false;
+        }
+        return true;
+      })
+      .sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+  }
+  function openCount(list) {
+    return Object.keys(state.tasks).filter(function (k) {
+      var t = state.tasks[k];
+      return t && !t.deleted && t.list === list && t.col !== 'done';
+    }).length;
+  }
+  function orderAt(col, index, skipId) {
+    var arr = colTasks(col, true).filter(function (t) { return t.id !== skipId; });
+    if (!arr.length) return now();
+    if (index <= 0) return (arr[0].order || now()) - 1000;
+    if (index >= arr.length) return (arr[arr.length - 1].order || now()) + 1000;
+    return ((arr[index - 1].order || 0) + (arr[index].order || 0)) / 2;
+  }
+
+  /* ══════════ waiting ══════════ */
+  function workDaysSince(ts) {
+    var a = new Date(ts), b = new Date();
+    a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0);
+    var n = 0, cur = new Date(a);
+    while (cur < b) { cur.setDate(cur.getDate() + 1); var w = cur.getDay(); if (w !== 0 && w !== 6) n++; }
+    return n;
+  }
+  // an expired wait comes back by itself, as a chase
+  function reapWaiting() {
+    var changed = false;
+    Object.keys(state.tasks).forEach(function (k) {
+      var t = state.tasks[k];
+      if (!t || t.col !== 'waiting' || !t.waiting || t.deleted) return;
+      var w = workDaysSince(t.waiting.since);
+      if (w >= (t.waiting.days || 5)) {
+        t.chase = { who: t.waiting.who || '', days: w };
+        t.waiting = null;
+        t.col = colTasks('today', true).length < TODAY_CAP ? 'today' : 'week';
+        t.order = orderAt(t.col, 0);
+        t.updatedAt = now();
+        changed = true;
+      }
+    });
+    if (changed) { saveLocal(); schedulePush(); }
+    return changed;
+  }
+
+  /* ══════════ moving cards ══════════ */
+  function moveTo(id, col, index) {
+    var t = state.tasks[id]; if (!t) return;
+    if (col === 'waiting' && t.col !== 'waiting') {
+      var who = prompt('Waiting on who?', t.chase ? t.chase.who : '');
+      if (who === null) return;
+      var dd = parseInt(prompt('Bring it back after how many working days?', '5'), 10);
+      t.waiting = { who: (who || '').trim(), since: now(), days: (dd > 0 && dd < 200) ? dd : 5 };
+      t.chase = null;
+    }
+    if (col !== 'waiting') t.waiting = null;
+    if (col === 'done' && t.col !== 'done') { t.done = true; t.completedAt = now(); flash(whyFor(t)); if (focusId === id) focusId = null; }
+    if (col !== 'done') { t.done = false; t.completedAt = null; }
+    t.col = col;
+    t.order = (typeof index === 'number') ? orderAt(col, index, id) : orderAt(col, 0, id);
+    movingId = null;
+    touch(t);
+  }
+  function addCard(title, col) {
+    var id = uid();
+    state.tasks[id] = { id: id, title: title, step: '', area: newArea || '', subs: [],
+      col: col || 'inbox', order: orderAt(col || 'inbox', 9e9), created: now(),
+      done: false, completedAt: null, deleted: false, waiting: null, chase: null, updatedAt: now() };
+    saveLocal(); render(); schedulePush();
+    return state.tasks[id];
+  }
+  function dropCard(id) { var t = state.tasks[id]; if (!t) return; t.deleted = true; if (focusId === id) focusId = null; touch(t); }
+
+  /* ══════════ render: board ══════════ */
+  function areaColor(a) { return a ? LISTC[(hash(a) % 6) + 5] : '#c7c7cc'; }
+
+  function cardHtml(t, idx, col) {
+    var subs = t.subs || [], dn = subs.filter(function (s) { return s.done; }).length;
+    var d = days(t.created);
+    var heat = heatOf(t, idx);
+    var meta = [];
+    if (t.area) meta.push('<span class="adot" style="background:' + areaColor(t.area) + '"></span>' + escH(t.area));
+    if (subs.length) meta.push('<span class="prog">' + dn + '/' + subs.length + ' steps</span>');
+    if (col === 'waiting' && t.waiting) {
+      var w = workDaysSince(t.waiting.since), left = Math.max(0, (t.waiting.days || 5) - w);
+      meta.push('<span>' + escH(t.waiting.who || 'someone') + ' · ' + w + 'd' + (left ? ' · back in ' + left : ' · due back') + '</span>');
+    } else if (col !== 'done') {
+      meta.push('<span' + (d >= 14 ? ' class="hot"' : '') + '>' + (d <= 0 ? 'today' : d + 'd') + '</span>');
+    }
+    if (t.chase) meta.push('<span class="chaseb">chase ' + escH(t.chase.who || 'them') + '</span>');
+
+    return '<div class="card' + (col === 'done' ? ' done' : '') + (movingId === t.id ? ' moving' : '') + '" draggable="true" data-id="' + t.id + '"' +
+      ' style="border-left-color:' + (col === 'today' ? tone(heat).color : (col === 'week' ? '#dd9020' : 'transparent')) + '">' +
+      '<button class="mv" data-move="' + t.id + '">›</button>' +
+      '<div class="ct">' + escH(t.title) + '</div>' +
+      (meta.length ? '<div class="cm">' + meta.join('<span>·</span>') + '</div>' : '') +
+      '<div class="mvrow">' + COLS.map(function (c) {
+        return '<button data-to="' + c.id + '" data-cid="' + t.id + '"' + (c.id === col ? ' class="cur"' : '') + '>' + c.name + '</button>';
+      }).join('') + '<button data-del="' + t.id + '">Delete</button></div>' +
+    '</div>';
+  }
+
+  function renderBoard() {
+    var b = document.getElementById('board');
+    var narrow = window.innerWidth <= 780;
+    b.innerHTML = COLS.map(function (c) {
+      var arr = colTasks(c.id);
+      var over = c.id === 'today' && arr.length > TODAY_CAP;
+      var shown = c.id === 'done' ? arr.slice(-25).reverse() : arr;
+      return '<section class="col' + (narrow && c.id !== mobileCol ? ' mhide' : '') + '" data-col="' + c.id + '">' +
+        '<div class="colhead"><h2>' + c.name + '</h2>' +
+          '<span class="cnt' + (over ? ' over3' : '') + '">' + arr.length + (c.id === 'today' ? ' / ' + TODAY_CAP : '') + '</span>' +
+          (c.id === 'done' ? '' : '<button class="add" data-add="' + c.id + '">+</button>') +
+        '</div>' +
+        '<div class="colbody" data-body="' + c.id + '">' +
+          (addingIn === c.id ? '<div class="addbox"><input id="addInput" placeholder="What is it?" maxlength="140"></div>' : '') +
+          shown.map(function (t, i) { return cardHtml(t, i, c.id); }).join('') +
+        '</div></section>';
+    }).join('');
+
+    var ai = document.getElementById('addInput');
+    if (ai) {
+      ai.focus();
+      ai.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { var v = ai.value.trim(); if (v) { addCard(v, addingIn); } else { addingIn = null; render(); } }
+        else if (e.key === 'Escape') { addingIn = null; render(); }
+      });
+      ai.addEventListener('blur', function () { if (!ai.value.trim()) { addingIn = null; render(); } });
+    }
+    bindDrag();
+  }
+
+  function renderTabs() {
+    document.getElementById('tabs').innerHTML = COLS.map(function (c) {
+      var n = colTasks(c.id).length;
+      return '<button data-tab="' + c.id + '"' + (c.id === mobileCol ? ' class="on"' : '') + '>' + c.name + '<span class="c">' + n + '</span></button>';
+    }).join('');
+    document.getElementById('nwork').textContent = openCount('work');
+    document.getElementById('npersonal').textContent = openCount('personal');
+  }
+
+  function allAreasOf() {
+    var seen = DEFAULT_AREAS.slice();
+    (state.areas || []).forEach(function (a) { if (seen.indexOf(a) < 0) seen.push(a); });
+    Object.keys(state.tasks).forEach(function (k) {
+      var a = state.tasks[k] && state.tasks[k].area;
+      if (a && seen.indexOf(a) < 0) seen.push(a);
+    });
+    return seen;
+  }
+  function renderAreas() {
+    var open = Object.keys(state.tasks).map(function (k) { return state.tasks[k]; })
+      .filter(function (t) { return t && !t.deleted && t.list === current && t.col !== 'done'; });
+    var cnt = function (a) { return open.filter(function (t) { return (t.area || '') === a; }).length; };
+    var html = '<button class="chip' + (filterArea === '' ? ' on' : '') + '" data-filter="">All<span class="c">' + open.length + '</span></button>';
+    html += allAreasOf().map(function (a) {
+      var n = cnt(a);
+      if (!n && DEFAULT_AREAS.indexOf(a) < 0) return '';
+      return '<button class="chip' + (filterArea === a ? ' on' : '') + '" data-filter="' + escH(a) + '">' + escH(a) + '<span class="c">' + n + '</span></button>';
+    }).join('');
+    var un = cnt('');
+    if (un) html += '<button class="chip' + (filterArea === ' ' ? ' on' : '') + '" data-filter=" ">no area<span class="c">' + un + '</span></button>';
+    html += '<button class="chip add" data-setarea="1">area for new cards: ' + escH(newArea || 'none') + '</button>';
+    document.getElementById('areaFilter').innerHTML = html;
+  }
+
+  function render() { renderBoard(); renderTabs(); renderAreas(); if (focusOn) renderFocus(); }
+
+  /* ══════════ drag and drop ══════════ */
+  var dragId = null;
+  function bindDrag() {
+    document.querySelectorAll('.card').forEach(function (el) {
+      el.addEventListener('dragstart', function (e) {
+        dragId = el.dataset.id; el.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        try { e.dataTransfer.setData('text/plain', dragId); } catch (x) {}
+      });
+      el.addEventListener('dragend', function () { dragId = null; el.classList.remove('dragging'); document.querySelectorAll('.col').forEach(function (c) { c.classList.remove('over'); }); });
+    });
+    document.querySelectorAll('.colbody').forEach(function (body) {
+      body.addEventListener('dragover', function (e) { e.preventDefault(); body.parentElement.classList.add('over'); });
+      body.addEventListener('dragleave', function () { body.parentElement.classList.remove('over'); });
+      body.addEventListener('drop', function (e) {
+        e.preventDefault();
+        body.parentElement.classList.remove('over');
+        var id = dragId || (e.dataTransfer && e.dataTransfer.getData('text/plain'));
+        if (!id) return;
+        var cards = [].slice.call(body.querySelectorAll('.card')).filter(function (c) { return c.dataset.id !== id; });
+        var idx = cards.length;
+        for (var i = 0; i < cards.length; i++) {
+          var r = cards[i].getBoundingClientRect();
+          if (e.clientY < r.top + r.height / 2) { idx = i; break; }
+        }
+        moveTo(id, body.dataset.body, idx);
+      });
+    });
+  }
+
+
   /* ══════════ focus mode ══════════ */
-  var RC = 2 * Math.PI * 78;   // ring circumference, r = 78
+  var RC = 2 * Math.PI * 78;
   var WHY_DEFAULT = ['More time with the family', 'More travelling', 'More kilometres on the bike',
                      'More time for sport', 'Evenings that are actually yours', 'Weekends without a backlog'];
   function whyList() { return (state.why && state.why.length) ? state.why : WHY_DEFAULT; }
   function whyFor(t) { var w = whyList(); return w[hash(t.id) % w.length]; }
-  // focus shows whatever the map handed it, otherwise the top of the queue
+
+  // focus serves the board order: Today first, then This Week, then Inbox
+  function focusQueue() { return colTasks('today').concat(colTasks('week'), colTasks('inbox')); }
   function focusTask() {
     var p = focusId ? state.tasks[focusId] : null;
-    if (p && !p.done && !p.deleted) return p;
-    return topOf(current);
+    if (p && !p.deleted && p.col !== 'done') return p;
+    return focusQueue()[0] || null;
   }
+  function focusHeat(t) {
+    var q = colTasks(t.col), i = q.findIndex(function (x) { return x.id === t.id; });
+    return heatOf(t, i < 0 ? 0 : i);
+  }
+
   function renderFocus() {
     var el = document.getElementById('focus');
     var t = focusTask();
@@ -1045,375 +834,95 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
         '<div class="fmain"><div class="fempty">Nothing left.</div></div><div class="fbottom"></div>';
       return;
     }
-    var k = tone(t.priority);
+    var heat = focusHeat(t), k = tone(heat);
     var subs = t.subs || [];
     var nextI = subs.findIndex(function (s) { return !s.done; });
     var doneN = subs.filter(function (s) { return s.done; }).length;
-    // idle shakes, working is completely still, and the interval is irregular so it stays noticeable
     el.className = 'on' + (timer.running ? '' : ' idle');
     el.style.setProperty('--fu', k.color);
     el.style.setProperty('--ftdur', (7 + Math.random() * 16).toFixed(1) + 's');
 
-    var clockHtml, ringOffset = 0, over = false;
+    var clockHtml = '', ringOffset = 0, over = false;
     if (timer.running) {
-      if (timer.mode === 'down') {
-        var total = timer.planned * 60;
-        ringOffset = RC * (1 - Math.max(0, timer.left) / total);
-        clockHtml = fmt(timer.left);
-      } else { over = true; clockHtml = '+' + fmt(timer.elapsed - timer.planned * 60); }
+      if (timer.mode === 'down') { ringOffset = RC * (1 - Math.max(0, timer.left) / (timer.planned * 60)); clockHtml = fmt(timer.left); }
+      else { over = true; clockHtml = '+' + fmt(timer.elapsed - timer.planned * 60); }
     }
+    var colName = (COLS.filter(function (c) { return c.id === t.col; })[0] || {}).name || '';
 
     el.innerHTML =
       '<div id="fart">' + areaArt(t.area || 'none') + '</div>' +
-      '<div class="ftop">' +
-        '<span class="fdot"></span>' +
-        '<span class="fmeta"><b>' + t.priority + ' · ' + LABEL[t.priority] + '</b>' +
-          (t.area ? ' · ' + escH(t.area) : '') + ' · ' + ageText(days(t.created)) + '</span>' +
-        '<button class="fx" data-f="exit">Esc</button>' +
-      '</div>' +
+      '<div class="ftop"><span class="fdot"></span>' +
+        '<span class="fmeta"><b>' + escH(colName) + '</b>' + (t.area ? ' · ' + escH(t.area) : '') +
+          ' · ' + (days(t.created) <= 0 ? 'added today' : days(t.created) + ' days old') + '</span>' +
+        '<button class="fx" data-f="exit">Esc</button></div>' +
       '<div class="fmain">' +
         '<div class="ftitle">' + escH(t.title) + '</div>' +
         (t.step ? '<div class="fstep"><b>Start by</b>' + escH(t.step) + '</div>' : '') +
-        (nextI >= 0
-          ? '<button class="fsub" data-f="sub"><span class="fbox"></span>' + escH(subs[nextI].text) + '</button>' +
-            (subs.length > 1 ? '<div class="fsubn">' + doneN + ' of ' + subs.length + ' steps done</div>' : '')
-          : '') +
+        (nextI >= 0 ? '<button class="fsub" data-f="sub"><span class="fbox"></span>' + escH(subs[nextI].text) + '</button>' +
+          (subs.length > 1 ? '<div class="fsubn">' + doneN + ' of ' + subs.length + ' steps done</div>' : '') : '') +
+        '<div class="subadd" style="margin-top:18px"><span class="plus">+</span><input id="subAdd" placeholder="' +
+          (subs.length ? 'Add another step' : 'Break it into steps') + '" maxlength="140"></div>' +
       '</div>' +
       '<div class="fbottom">' +
-        (timer.running
-          ? '<div class="fring">' +
-              '<svg width="168" height="168" viewBox="0 0 168 168">' +
-                '<circle class="bg" cx="84" cy="84" r="78"></circle>' +
-                (over ? '' : '<circle class="fg" cx="84" cy="84" r="78" stroke-dasharray="' + RC.toFixed(1) + '" stroke-dashoffset="' + ringOffset.toFixed(1) + '"></circle>') +
-              '</svg>' +
-              '<div class="fclock' + (over ? ' over' : '') + '" id="fClock">' + clockHtml + '</div>' +
-            '</div>'
-          : '') +
+        (timer.running ? '<div class="fring"><svg width="168" height="168" viewBox="0 0 168 168">' +
+          '<circle class="bg" cx="84" cy="84" r="78"></circle>' +
+          (over ? '' : '<circle class="fg" cx="84" cy="84" r="78" stroke-dasharray="' + RC.toFixed(1) + '" stroke-dashoffset="' + ringOffset.toFixed(1) + '"></circle>') +
+          '</svg><div class="fclock' + (over ? ' over' : '') + '" id="fClock">' + clockHtml + '</div></div>' : '') +
         '<div class="fbtns">' +
           (timer.running
             ? '<button class="fbtn go" data-f="done">Done</button><button class="fbtn" data-f="plus">+5 min</button><button class="fbtn" data-f="stop">Stop</button>'
-            : '<button class="fbtn go" data-f="t15">Start 15 min</button><button class="fbtn" data-f="t45">45</button><button class="fbtn" data-f="done">Done</button>') +
+            : '<button class="fbtn go" data-f="t15">Start 15 min</button><button class="fbtn" data-f="t45">45</button><button class="fbtn" data-f="done">Done</button><button class="fbtn" data-f="next">Skip</button>') +
         '</div>' +
         '<div class="fwhy"><b>What this buys</b><span>' + escH(whyFor(t)) + '</span></div>' +
       '</div>';
-  }
 
-  function openFocus() { focusOn = true; renderFocus(); }
+    var sa = document.getElementById('subAdd');
+    if (sa) {
+      sa.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        var v = sa.value.trim(); if (!v) return;
+        sa.value = ''; refocusSub = true;
+        t.subs = t.subs || []; t.subs.push({ text: v, done: false }); touch(t);
+      });
+      if (refocusSub) { refocusSub = false; sa.focus(); }
+    }
+  }
+  function openFocus(id) { if (id) focusId = id; focusOn = true; renderFocus(); }
   function closeFocus() { focusOn = false; focusId = null; document.getElementById('focus').className = ''; }
 
-  /* ══════════ map ══════════ */
-  var mapOn = false, mapSel = null, view = { x: 0, y: 0, w: 1000, h: 700 }, nodes = [];
-
-  // left-to-right tree: root, then areas, then tasks. every label stays horizontal.
-  var ROOT_X = 0, AREA_X = 250, TASK_X = 470, ROW_H = 38, GROUP_GAP = 34;
-
-  function buildMap() {
-    var tasks = live(current, true, true);   // waiting items included, drawn hollow
-    nodes = [];
-    var groups = {}, order = [];
-    tasks.forEach(function (t) {
-      var a = t.area || 'no area';
-      if (!groups[a]) { groups[a] = []; order.push(a); }
-      groups[a].push(t);
-    });
-    // busiest area first, so the heaviest part of your workload is at the top
-    order.sort(function (a, b) { return groups[b].length - groups[a].length; });
-
-    var svg = document.getElementById('mapSvg');
-    if (!tasks.length) {
-      svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" class="narea">Nothing open here.</text>';
-      document.getElementById('mapTitle').textContent = (current === 'work' ? 'Work' : 'Personal') + ' · nothing open';
-      return;
-    }
-
-    // narrow screens get an indented outline instead of a wide tree, so labels stay readable
-    var compact = (svg.clientWidth || 900) < 620;
-
-    if (compact) {
-      var cy2 = 0, links2 = '', items2 = '';
-      order.forEach(function (name) {
-        var list = groups[name].slice().sort(function (a, b) {
-          return b.priority !== a.priority ? b.priority - a.priority : a.created - b.created;
-        });
-        items2 += '<text class="narea" x="4" y="' + cy2.toFixed(1) + '" dy="0.35em" text-anchor="start">' + escH(name) +
-          '<tspan class="nage">  ' + list.length + '</tspan></text>';
-        nodes.push({ x: 0, y: cy2 - 20 });
-        var groupTop = cy2 + 26;
-        cy2 += 30;
-        list.forEach(function (t) {
-          var ry = cy2 + 20;
-          var rad = 6 + Math.min(6, days(t.created) / 11);
-          var title = t.title.length > 34 ? t.title.slice(0, 33) + '…' : t.title;
-          var d = days(t.created);
-          items2 += '<g class="nodehit' + (mapSel === t.id ? ' nsel' : '') + '" data-task="' + t.id + '">' +
-            '<rect x="10" y="' + (ry - 19).toFixed(1) + '" width="380" height="38" rx="9" fill="transparent"/>' +
-            '<circle class="ndot" cx="30" cy="' + ry.toFixed(1) + '" r="' + rad.toFixed(1) + '" fill="' + (t.waiting ? '#fff' : LISTC[t.priority]) + '" stroke="' + (t.waiting ? LISTC[t.priority] : '#fff') + '" stroke-width="' + (t.waiting ? 2.5 : 1.5) + '"/>' +
-            '<text class="nurg" x="50" y="' + ry.toFixed(1) + '" dy="0.35em" fill="' + LISTC[t.priority] + '">' + t.priority + '</text>' +
-            '<text class="nlabel" x="72" y="' + ry.toFixed(1) + '" dy="0.35em">' + escH(title) +
-              '<tspan class="nage"> · ' + (t.waiting ? 'waiting on ' + escH(t.waiting.who || 'someone') : (d <= 0 ? 'today' : d + 'd')) + '</tspan></text></g>';
-          nodes.push({ x: 72 + title.length * 7.4 + 30, y: ry });
-          cy2 += 40;
-        });
-        links2 += '<path class="mlink" d="M 30 ' + groupTop.toFixed(1) + ' L 30 ' + (cy2 - 22).toFixed(1) + '" stroke-width="1.4"/>';
-        cy2 += 18;
-      });
-      svg.innerHTML = links2 + items2;
-      document.getElementById('mapTitle').textContent =
-        (current === 'work' ? 'Work' : 'Personal') + ' · ' + tasks.length + ' open · ' + order.length + ' areas';
-      return;
-    }
-
-    // pass 1: work out every row position before drawing anything
-    var plan = [], y = 0;
-    order.forEach(function (name) {
-      var list = groups[name].slice().sort(function (a, b) {
-        return b.priority !== a.priority ? b.priority - a.priority : a.created - b.created;
-      });
-      var top = y, rows = [];
-      list.forEach(function (t) { rows.push({ t: t, y: y + ROW_H / 2 }); y += ROW_H; });
-      plan.push({ name: name, rows: rows, ay: (top + y) / 2 });
-      y += GROUP_GAP;
-    });
-    var rootY = (plan[0].ay + plan[plan.length - 1].ay) / 2;
-
-    // pass 2: draw
-    var links = '', items = '';
-    plan.forEach(function (g) {
-      links += '<path class="mlink" d="M ' + (ROOT_X + 46) + ' ' + rootY.toFixed(1) +
-               ' C ' + (ROOT_X + 140) + ' ' + rootY.toFixed(1) + ', ' + (AREA_X - 120) + ' ' + g.ay.toFixed(1) +
-               ', ' + (AREA_X - 32) + ' ' + g.ay.toFixed(1) + '" stroke-width="2"/>';
-
-      g.rows.forEach(function (r) {
-        links += '<path class="mlink" d="M ' + (AREA_X + 32) + ' ' + g.ay.toFixed(1) +
-                 ' C ' + (AREA_X + 120) + ' ' + g.ay.toFixed(1) + ', ' + (TASK_X - 90) + ' ' + r.y.toFixed(1) +
-                 ', ' + (TASK_X - 14) + ' ' + r.y.toFixed(1) + '" stroke-width="1.4"/>';
-
-        var t = r.t;
-        var rad = 6 + Math.min(6, days(t.created) / 11);        // older tasks grow
-        var title = t.title.length > 38 ? t.title.slice(0, 37) + '…' : t.title;
-        var d = days(t.created);
-        items += '<g class="nodehit' + (mapSel === t.id ? ' nsel' : '') + '" data-task="' + t.id + '">' +
-          '<rect x="' + (TASK_X - 18) + '" y="' + (r.y - ROW_H / 2 + 3).toFixed(1) + '" width="430" height="' + (ROW_H - 6) + '" rx="9" fill="transparent"/>' +
-          '<circle class="ndot" cx="' + TASK_X + '" cy="' + r.y.toFixed(1) + '" r="' + rad.toFixed(1) +
-            '" fill="' + (t.waiting ? '#fff' : LISTC[t.priority]) + '" stroke="' + (t.waiting ? LISTC[t.priority] : '#fff') + '" stroke-width="' + (t.waiting ? 2.5 : 1.5) + '"/>' +
-          '<text class="nurg" x="' + (TASK_X + 20) + '" y="' + r.y.toFixed(1) + '" dy="0.35em" fill="' + LISTC[t.priority] + '">' + t.priority + '</text>' +
-          '<text class="nlabel" x="' + (TASK_X + 42) + '" y="' + r.y.toFixed(1) + '" dy="0.35em">' + escH(title) +
-            '<tspan class="nage"> · ' + (t.waiting ? 'waiting on ' + escH(t.waiting.who || 'someone') : (d <= 0 ? 'today' : d + 'd')) + '</tspan></text>' +
-          '</g>';
-        nodes.push({ x: TASK_X + 42 + title.length * 7.4 + 46, y: r.y });
-        nodes.push({ x: TASK_X - 20, y: r.y });
-      });
-
-      items += '<g><rect x="' + (AREA_X - 32) + '" y="' + (g.ay - 17).toFixed(1) + '" width="64" height="34" rx="17" fill="#fff" stroke="rgba(0,0,0,.13)" stroke-width="1.5"/>' +
-        '<text class="nareacount" x="' + AREA_X + '" y="' + g.ay.toFixed(1) + '" dy="0.35em" text-anchor="middle">' + g.rows.length + '</text>' +
-        '<text class="narea" x="' + (AREA_X - 44) + '" y="' + g.ay.toFixed(1) + '" dy="0.35em" text-anchor="end">' + escH(g.name) + '</text></g>';
-      nodes.push({ x: AREA_X - 50 - g.name.length * 8.5, y: g.ay });
-    });
-
-    var root = '<circle cx="' + ROOT_X + '" cy="' + rootY.toFixed(1) + '" r="42" fill="#1d1d1f"/>' +
-      '<text class="nroot" x="' + ROOT_X + '" y="' + rootY.toFixed(1) + '" dy="0.35em" text-anchor="middle">' +
-      (current === 'work' ? 'WORK' : 'LIFE') + '</text>';
-    nodes.push({ x: ROOT_X - 50, y: rootY });
-
-    svg.innerHTML = links + root + items;
-    document.getElementById('mapTitle').textContent =
-      (current === 'work' ? 'Work' : 'Personal') + ' · ' + tasks.length + ' open · ' + order.length + ' areas';
-  }
-
-  // fit the width so text stays a readable size; pan vertically if it is taller than the screen
-  function fitMap() {
-    var el = document.getElementById('mapSvg');
-    if (!nodes.length) { view = { x: -100, y: -300, w: 1000, h: 600 }; return applyView(); }
-    var xs = nodes.map(function (n) { return n.x; }), ys = nodes.map(function (n) { return n.y; });
-    var padX = 40, padY = 30;
-    var x0 = Math.min.apply(null, xs) - padX, x1 = Math.max.apply(null, xs) + padX;
-    var y0 = Math.min.apply(null, ys) - padY, y1 = Math.max.apply(null, ys) + padY;
-    var w = x1 - x0, h = y1 - y0;
-    var vw = el.clientWidth || 900, vh = el.clientHeight || 600;
-    var ar = vw / vh;
-    var viewH = w / ar;
-    if (viewH >= h) {                       // everything fits: centre it vertically
-      view = { x: x0, y: y0 - (viewH - h) / 2, w: w, h: viewH };
-    } else {                                // taller than the screen: fit width, start at the top
-      view = { x: x0, y: y0, w: w, h: viewH };
-    }
-    applyView();
-  }
-
-  function applyView() {
-    document.getElementById('mapSvg').setAttribute('viewBox',
-      view.x.toFixed(1) + ' ' + view.y.toFixed(1) + ' ' + view.w.toFixed(1) + ' ' + view.h.toFixed(1));
-  }
-  function zoom(f, cx, cy) {
-    var el = document.getElementById('mapSvg');
-    if (cx == null) { cx = view.x + view.w / 2; cy = view.y + view.h / 2; }
-    var nw = Math.max(220, Math.min(6000, view.w * f)), nh = nw * (view.h / view.w);
-    view.x = cx - (cx - view.x) * (nw / view.w);
-    view.y = cy - (cy - view.y) * (nh / view.h);
-    view.w = nw; view.h = nh; applyView();
-  }
-
-  function renderSheet() {
-    var s = document.getElementById('mSheet');
-    var t = mapSel ? state.tasks[mapSel] : null;
-    if (!t) { s.className = 'msheet'; return; }
-    s.className = 'msheet on';
-    s.innerHTML =
-      '<div class="mst">' + escH(t.title) + '</div>' +
-      '<div class="msm">' + escH(t.area || 'no area') + ' · ' + ageText(days(t.created)) +
-        ((t.subs || []).length ? ' · ' + t.subs.filter(function (x) { return x.done; }).length + '/' + t.subs.length + ' steps' : '') + '</div>' +
-      '<div class="msrow">' +
-        '<button class="rnd" data-m="down">−</button>' +
-        '<span class="urgbig" style="color:' + LISTC[t.priority] + '">' + t.priority + '</span>' +
-        '<button class="rnd" data-m="up">+</button>' +
-        '<span class="msm" style="margin:0 6px 0 2px">' + LABEL[t.priority] + '</span>' +
-        '<button class="mbtn" data-m="focus" style="margin-left:auto">Open in focus</button>' +
-        '<button class="mbtn" data-m="mdone">Done</button>' +
-      '</div>';
-  }
-
-  function openMap() {
-    mapOn = true; mapSel = null;
-    document.getElementById('map').classList.add('on');
-    buildMap(); renderSheet();
-    requestAnimationFrame(fitMap);
-  }
-  function closeMap() { mapOn = false; mapSel = null; document.getElementById('map').classList.remove('on'); }
-
-  /* ══════════ actions ══════════ */
+  /* ══════════ flash ══════════ */
   function flash(why) {
     var f = document.getElementById('flash');
-    document.getElementById('flashWhy').innerHTML = why
-      ? '<b>One less thing between you and</b><i>' + escH(why) + '</i>' : '';
+    document.getElementById('flashWhy').innerHTML = why ? '<b>One less thing between you and</b><i>' + escH(why) + '</i>' : '';
     document.body.classList.toggle('dark-flash', focusOn);
     f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
     setTimeout(function () { f.classList.remove('on'); }, 2450);
   }
-  function complete(id) {
-    var t = state.tasks[id]; if (!t) return;
-    var why = whyFor(t);
-    if (focusId === id) focusId = null;
-    if (mapSel === id) mapSel = null;
-    t.done = true; t.completedAt = now();
-    Object.keys(localOnly).forEach(function (k) { if (state.tasks[k] && state.tasks[k].list === t.list) localOnly[k].parked = false; });
-    flash(why); stopTimer(); touch(t);
-  }
-  function drop(id) { var t = state.tasks[id]; if (!t) return; t.deleted = true; touch(t); }
-  function nudge(id, delta) {
-    var t = state.tasks[id]; if (!t) return;
-    t.priority = Math.min(10, Math.max(1, t.priority + delta));
-    lo(id).parked = false; touch(t);
-  }
-  function skip(id) {
-    var t = state.tasks[id]; if (!t) return;
-    var m = lo(id); m.skips = (m.skips || 0) + 1;
-    var others = live(t.list).filter(function (x) { return x.id !== id && !(localOnly[x.id] || {}).parked; });
-    if (!others.length) live(t.list).forEach(function (x) { lo(x.id).parked = false; });
-    m.parked = true; saveLocal(); render();
-  }
-  function addTask(title, step, prio, list, subs, area) {
-    var id = uid();
-    state.tasks[id] = { id: id, title: title, step: step || '', priority: clampP(prio), list: list,
-      area: area || '', subs: subs || [], created: now(), done: false, completedAt: null, deleted: false, updatedAt: now() };
-    return state.tasks[id];
-  }
 
-  /* ══════════ import / export ══════════ */
-  var SUBMARK = /^[-–—*•▪·]\s+/, DONEMARK = /^(✓|✔|\[x\]|\[X\])\s*/;
-  function importText(text) {
-    var lines = String(text).split(/\r?\n/).map(function (x) { return x.replace(/ /g, ' ').replace(/^\t+/, '- ').replace(/\s+$/, ''); });
-    var section = null, last = null, added = 0;
-    lines.forEach(function (raw, i) {
-      var line0 = raw.trim(); if (!line0) return;
-      var isSub = SUBMARK.test(line0);
-      var line = line0.replace(SUBMARK, '').trim(); if (!line) return;
-      var up = line.toUpperCase().replace(/[:：]$/, '');
-      if (i === 0 && up === 'ONE THING') return;
-      if (!isSub) {
-        if (up === 'WORK' || up === 'PRÁCE' || up === 'PRACE') { section = 'work'; last = null; return; }
-        if (up === 'PERSONAL' || up === 'OSOBNÍ' || up === 'OSOBNI') { section = 'personal'; last = null; return; }
-        if (up === 'DONE' || up === 'HOTOVO') { section = 'done'; last = null; return; }
-      }
-      if (!section || section === 'done') return;
-      if (isSub && last) {
-        var sd = DONEMARK.test(line), st = line.replace(DONEMARK, '').trim();
-        if (st) { last.subs.push({ text: st, done: sd }); last.updatedAt = now(); }
-        return;
-      }
-      var area = '', waitWho = null;
-      line = line.replace(/\s+@([^\s]{1,30})\s*$/, function (_, w) { waitWho = w.replace(/_/g, ' '); return ''; });
-      line = line.replace(/\s+#([a-z0-9_-]{1,20})\s*$/i, function (_, a) { area = a.toLowerCase(); return ''; });
-      var mm = line.match(/^(\d{1,2})\s*[·•.\-–—|:)]\s*(.+)$/);
-      var prio = mm ? clampP(mm[1]) : 5;
-      var rest = mm ? mm[2] : line;
-      var parts = rest.split(/\s*(?:»|>>|→)\s*/);
-      var title = (parts[0] || '').trim(); if (!title) return;
-      var dup = live(section, true).find(function (x) { return x.title.toLowerCase() === title.toLowerCase(); });
-      if (dup) { last = dup; return; }
-      last = addTask(title, (parts[1] || '').trim(), prio, section, [], area);
-      if (waitWho) last.waiting = { who: waitWho, since: now(), days: 5 };
-      added++;
-    });
-    return added;
-  }
-  function exportText() {
-    var out = ['One Thing', ''];
-    ['work', 'personal'].forEach(function (list) {
-      out.push(list === 'work' ? 'WORK' : 'PERSONAL');
-      live(list, true, true).forEach(function (t) {
-        out.push(t.priority + ' · ' + t.title + (t.step ? ' » ' + t.step : '') + (t.area ? ' #' + t.area : '') +
-                 (t.waiting ? ' @' + (t.waiting.who || 'someone').replace(/\s+/g, '_') : ''));
-        (t.subs || []).forEach(function (s) { out.push('- ' + (s.done ? '✓ ' : '') + s.text); });
-      });
-      out.push('');
-    });
-    out.push('DONE');
-    doneList().slice(0, 30).forEach(function (t) {
-      out.push('✓ ' + new Date(t.completedAt || now()).toISOString().slice(0, 10) + ' · ' + t.title);
-    });
-    return out.join('\n');
-  }
-
-  /* ══════════ timer ══════════ */
+  /* ══════════ timer and focus sessions ══════════ */
   function fmt(s) {
     s = Math.max(0, Math.round(s));
     var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60;
     return (h ? h + ':' + String(m).padStart(2, '0') : String(m)) + ':' + (r < 10 ? '0' : '') + r;
   }
   function startTimer(mins) {
-    logSession();                       // close any running session first
-    var t = topOf(current);
-    timer.left = Math.max(1, mins) * 60;
-    timer.elapsed = 0; timer.running = true; timer.mode = 'down';
+    logSession();
+    var t = focusTask();
+    timer.left = Math.max(1, mins) * 60; timer.elapsed = 0; timer.running = true; timer.mode = 'down';
     timer.taskId = t ? t.id : null; timer.startedAt = now(); timer.planned = mins;
-    var b = document.getElementById('timer');
-    b.classList.add('on'); b.classList.remove('done', 'over');
-    document.body.classList.add('working');     // everything stops moving
+    document.body.classList.add('working');
     tick(); timer.id = setInterval(tick, 1000);
     if (focusOn) renderFocus();
   }
   function tick() {
-    var lbl = document.getElementById('timerlbl'), clk = document.getElementById('clock');
     if (timer.mode === 'down') {
-      if (timer.left <= 0) {                       // roll over instead of stopping
-        timer.mode = 'up';
-        document.getElementById('timer').classList.add('over');
-        lbl.textContent = 'Past ' + timer.planned + ' min · still going';
-        clk.textContent = '+0:00';
-        if (focusOn) renderFocus();
-        return;
-      }
-      lbl.textContent = 'Sprint · just start';
-      clk.textContent = fmt(timer.left);
+      if (timer.left <= 0) { timer.mode = 'up'; if (focusOn) renderFocus(); return; }
       timer.left--; timer.elapsed++;
-    } else {
-      timer.elapsed++;
-      clk.textContent = '+' + fmt(timer.elapsed - timer.planned * 60);
-    }
-    if (focusOn) paintFocusClock();
+    } else timer.elapsed++;
+    if (focusOn) paintClock();
   }
-  // update only the numbers and the ring, so the focus view never re-renders under you
-  function paintFocusClock() {
+  function paintClock() {
     var c = document.getElementById('fClock');
     if (!c) { renderFocus(); return; }
     if (timer.mode === 'down') {
@@ -1422,41 +931,79 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
       if (ring) ring.setAttribute('stroke-dashoffset', (RC * (1 - Math.max(0, timer.left) / (timer.planned * 60))).toFixed(1));
     } else c.textContent = '+' + fmt(timer.elapsed - timer.planned * 60);
   }
-  // a finished stretch of focus becomes a record, which is what future reports will read
   function logSession() {
     if (!timer.running) return;
     var secs = Math.round((now() - timer.startedAt) / 1000);
     timer.running = false;
     if (timer.id) clearInterval(timer.id);
     timer.id = null;
-    if (secs < 30) return;                          // ignore accidental taps
+    if (secs < 30) return;
     var t = timer.taskId ? state.tasks[timer.taskId] : null;
     var id = uid();
-    state.sessions[id] = {
-      id: id, taskId: timer.taskId || '', title: t ? t.title : '',
-      area: t ? (t.area || '') : '', list: t ? t.list : current,
-      start: timer.startedAt, end: now(), sec: secs
-    };
+    state.sessions[id] = { id: id, taskId: timer.taskId || '', title: t ? t.title : '', area: t ? (t.area || '') : '',
+      list: t ? t.list : current, start: timer.startedAt, end: now(), sec: secs };
     saveLocal(); schedulePush();
   }
   function stopTimer() {
     logSession();
     if (timer.id) clearInterval(timer.id);
     timer.id = null; timer.running = false; timer.mode = 'down';
-    document.getElementById('timer').classList.remove('on', 'done', 'over');
     document.body.classList.remove('working');
-    renderStats();
     if (focusOn) renderFocus();
   }
-  function focusSecs(since) {
-    return Object.keys(state.sessions || {}).reduce(function (n, k) {
-      var s = state.sessions[k];
-      return n + ((s && (s.end || 0) >= since) ? (s.sec || 0) : 0);
-    }, 0);
+
+  /* ══════════ import / export ══════════ */
+  var SUBMARK = /^[-–—*•▪·]\s+/, DONEMARK = /^(✓|✔|\[x\]|\[X\])\s*/;
+  function importText(text) {
+    var lines = String(text).split(/\r?\n/).map(function (x) { return x.replace(/ /g, ' ').replace(/^\t+/, '- ').replace(/\s+$/, ''); });
+    var section = current, last = null, added = 0;
+    lines.forEach(function (raw) {
+      var line0 = raw.trim(); if (!line0) return;
+      var isSub = SUBMARK.test(line0);
+      var line = line0.replace(SUBMARK, '').trim(); if (!line) return;
+      var up = line.toUpperCase().replace(/[:：]$/, '');
+      if (!isSub) {
+        if (up === 'WORK' || up === 'PRÁCE' || up === 'PRACE') { section = 'work'; last = null; return; }
+        if (up === 'PERSONAL' || up === 'OSOBNÍ' || up === 'OSOBNI') { section = 'personal'; last = null; return; }
+        if (up === 'DONE' || up === 'HOTOVO' || up === 'INBOX') { last = null; return; }
+      }
+      if (isSub && last) {
+        var sd = DONEMARK.test(line), st = line.replace(DONEMARK, '').trim();
+        if (st) { last.subs.push({ text: st, done: sd }); last.updatedAt = now(); }
+        return;
+      }
+      var area = '';
+      line = line.replace(/\s+#([a-z0-9_-]{1,20})\s*$/i, function (_, a) { area = a.toLowerCase(); return ''; });
+      line = line.replace(/^\d{1,2}\s*[·•.\-–—|:)]\s*/, '');
+      var parts = line.split(/\s*(?:»|>>|→)\s*/);
+      var title = (parts[0] || '').trim(); if (!title) return;
+      var id = uid();
+      state.tasks[id] = { id: id, title: title, step: (parts[1] || '').trim(), area: area, subs: [],
+        col: 'inbox', order: now() + added, list: section, created: now(),
+        done: false, completedAt: null, deleted: false, waiting: null, chase: null, updatedAt: now() };
+      last = state.tasks[id]; added++;
+    });
+    return added;
   }
-  function humanMin(sec) {
-    var m = Math.round(sec / 60);
-    return m < 60 ? m + 'm' : (Math.floor(m / 60) + 'h' + (m % 60 ? ' ' + (m % 60) + 'm' : ''));
+  function exportText() {
+    var out = [];
+    ['work', 'personal'].forEach(function (list) {
+      out.push(list === 'work' ? 'WORK' : 'PERSONAL', '');
+      COLS.forEach(function (c) {
+        var arr = Object.keys(state.tasks).map(function (k) { return state.tasks[k]; })
+          .filter(function (t) { return t && !t.deleted && t.list === list && t.col === c.id; })
+          .sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+        if (!arr.length) return;
+        out.push('[' + c.name + ']');
+        arr.forEach(function (t) {
+          out.push(t.title + (t.step ? ' » ' + t.step : '') + (t.area ? ' #' + t.area : '') +
+            (t.waiting ? ' (waiting on ' + (t.waiting.who || '?') + ')' : ''));
+          (t.subs || []).forEach(function (s) { out.push('- ' + (s.done ? '✓ ' : '') + s.text); });
+        });
+        out.push('');
+      });
+    });
+    return out.join('\n');
   }
 
   /* ══════════ wiring ══════════ */
@@ -1464,266 +1011,127 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     document.querySelectorAll('.seg button').forEach(function (b) {
       b.addEventListener('click', function () {
         document.querySelectorAll('.seg button').forEach(function (x) { x.classList.remove('on'); });
-        b.classList.add('on'); current = b.dataset.list;
-        document.getElementById('addWhere').textContent = current; render();
+        b.classList.add('on'); current = b.dataset.list; focusId = null; render();
       });
     });
 
-    document.getElementById('hero').addEventListener('click', function (e) {
-      var t = topOf(current); if (!t) return;
-      var mn = e.target.closest('[data-min]');
-      if (mn) { startTimer(parseInt(mn.dataset.min, 10)); return; }
-      var ab = e.target.closest('[data-area]');
-      if (ab) { cycleArea(t); return; }
-      var ee = e.target.closest('[data-edit]');
-      if (ee) { editing = { id: t.id, field: ee.dataset.edit }; render(); return; }
-      var se = e.target.closest('[data-subedit]');
-      if (se) { editing = { id: t.id, field: 'sub', index: parseInt(se.dataset.subedit, 10) }; render(); return; }
-      var s = e.target.closest('[data-sub]');
-      if (s) { var i = parseInt(s.dataset.sub, 10); t.subs[i].done = !t.subs[i].done; touch(t); return; }
-      var b = e.target.closest('[data-do]'); if (!b) return;
-      var a = b.dataset.do;
-      if (a === 'done') complete(t.id);
-      else if (a === 'focus') openFocus();
-      else if (a === 'wait') {
-        var who = prompt('Waiting on who? (e.g. Juho, Tereza, the bank)', t.chase ? t.chase.who : '');
-        if (who === null) return;
-        var dd = parseInt(prompt('Bring it back after how many working days?', '5'), 10);
-        startWaiting(t, who, (dd > 0 && dd < 200) ? dd : 5);
+    document.getElementById('tabs').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-tab]'); if (!b) return;
+      mobileCol = b.dataset.tab; render();
+    });
+
+    document.getElementById('board').addEventListener('click', function (e) {
+      var add = e.target.closest('[data-add]');
+      if (add) { addingIn = add.dataset.add; render(); return; }
+      var mv = e.target.closest('[data-move]');
+      if (mv) { movingId = (movingId === mv.dataset.move) ? null : mv.dataset.move; render(); return; }
+      var to = e.target.closest('[data-to]');
+      if (to) { moveTo(to.dataset.cid, to.dataset.to, 0); return; }
+      var del = e.target.closest('[data-del]');
+      if (del) { if (confirm('Delete this card?')) dropCard(del.dataset.del); return; }
+      var card = e.target.closest('.card');
+      if (card) { openFocus(card.dataset.id); }
+    });
+
+    document.getElementById('areaFilter').addEventListener('click', function (e) {
+      var f = e.target.closest('[data-filter]');
+      if (f) { filterArea = f.dataset.filter; render(); return; }
+      if (e.target.closest('[data-setarea]')) {
+        var list = [''].concat(allAreasOf());
+        var i = list.indexOf(newArea);
+        var nx = list[(i + 1) % list.length];
+        if (i === list.length - 1) {
+          var n = (prompt('New area name (leave empty to cycle)') || '').trim().toLowerCase();
+          if (n) { state.areas = state.areas || []; if (state.areas.indexOf(n) < 0 && DEFAULT_AREAS.indexOf(n) < 0) state.areas.push(n); nx = n; saveLocal(); schedulePush(); }
+        }
+        newArea = nx; render();
       }
-      else if (a === 'skip') skip(t.id);
-      else if (a === 'up') nudge(t.id, 1);
-      else if (a === 'down') nudge(t.id, -1);
-      else if (a === 'drop') { if (confirm('Delete “' + t.title + '”?')) drop(t.id); }
-      else if (a === 'timer') startTimer(15);
     });
 
     document.getElementById('focus').addEventListener('click', function (e) {
       var b = e.target.closest('[data-f]'); if (!b) return;
-      var t = focusTask();
-      var a = b.dataset.f;
+      var a = b.dataset.f, t = focusTask();
       if (a === 'exit') return closeFocus();
       if (!t) return closeFocus();
-      if (a === 'done') complete(t.id);
+      if (a === 'done') { stopTimer(); moveTo(t.id, 'done', 0); }
+      else if (a === 'next') { var q = focusQueue(); var i = q.findIndex(function (x) { return x.id === t.id; }); focusId = (q[i + 1] || q[0] || {}).id || null; renderFocus(); }
       else if (a === 't15') startTimer(15);
       else if (a === 't45') startTimer(45);
       else if (a === 'stop') stopTimer();
       else if (a === 'plus') {
-        if (timer.mode === 'up') { timer.mode = 'down'; timer.left = 300; timer.planned += 5; document.getElementById('timer').classList.remove('over'); }
+        if (timer.mode === 'up') { timer.mode = 'down'; timer.left = 300; timer.planned += 5; }
         else { timer.left += 300; timer.planned += 5; }
         renderFocus();
       } else if (a === 'sub') {
-        var i = (t.subs || []).findIndex(function (s) { return !s.done; });
-        if (i >= 0) { t.subs[i].done = true; touch(t); }
+        var i2 = (t.subs || []).findIndex(function (s) { return !s.done; });
+        if (i2 >= 0) { t.subs[i2].done = true; touch(t); }
       }
     });
 
-    document.getElementById('list').addEventListener('click', function (e) {
-      var b = e.target.closest('button'); if (!b) return;
-      if (b.dataset.done) complete(b.dataset.done);
-      else if (b.dataset.raise) nudge(b.dataset.raise, 2);
+    document.getElementById('focusBtn').addEventListener('click', function () { openFocus(); });
+    document.getElementById('ioBtn').addEventListener('click', function () {
+      document.getElementById('io').classList.add('on');
+      document.getElementById('whyBox').value = whyList().join('\n');
     });
-
-    // clicking the badge on the card walks through the areas, so tagging never needs a menu
-    window.cycleArea = function (t) {
-      var list = [''].concat(allAreas());
-      var i = list.indexOf(t.area || '');
-      t.area = list[(i + 1) % list.length];
-      touch(t);
-    };
-
-    document.getElementById('openMapBtn').addEventListener('click', openMap);
-
-    document.getElementById('map').addEventListener('click', function (e) {
-      var n = e.target.closest('[data-task]');
-      if (n) { mapSel = n.dataset.task; buildMap(); renderSheet(); return; }
-      var b = e.target.closest('[data-m]'); if (!b) return;
-      var a = b.dataset.m, t = mapSel ? state.tasks[mapSel] : null;
-      if (a === 'close') return closeMap();
-      if (a === 'fit') return fitMap();
-      if (a === 'zin') return zoom(0.75);
-      if (a === 'zout') return zoom(1.33);
-      if (!t) return;
-      if (a === 'up' || a === 'down') {
-        t.priority = Math.min(10, Math.max(1, t.priority + (a === 'up' ? 1 : -1)));
-        lo(t.id).parked = false; t.updatedAt = now();
-        saveLocal(); schedulePush(); buildMap(); renderSheet(); renderHero(); renderList();
-      } else if (a === 'focus') { focusId = t.id; closeMap(); openFocus(); }
-      else if (a === 'mdone') { complete(t.id); buildMap(); renderSheet(); }
-    });
-
-    // pan and zoom
-    (function () {
-      var el = document.getElementById('mapSvg'), drag = null, pinch = null;
-      function pt(ev) { return { x: ev.clientX, y: ev.clientY }; }
-      el.addEventListener('pointerdown', function (ev) {
-        if (ev.target.closest('[data-task]')) return;
-        drag = { p: pt(ev), v: { x: view.x, y: view.y } };
-        el.classList.add('drag'); el.setPointerCapture(ev.pointerId);
-      });
-      el.addEventListener('pointermove', function (ev) {
-        if (!drag) return;
-        var r = el.getBoundingClientRect();
-        view.x = drag.v.x - (ev.clientX - drag.p.x) * (view.w / r.width);
-        view.y = drag.v.y - (ev.clientY - drag.p.y) * (view.h / r.height);
-        applyView();
-      });
-      ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t2) {
-        el.addEventListener(t2, function () { drag = null; el.classList.remove('drag'); });
-      });
-      el.addEventListener('wheel', function (ev) {
-        ev.preventDefault();
-        var r = el.getBoundingClientRect();
-        var cx = view.x + (ev.clientX - r.left) / r.width * view.w;
-        var cy = view.y + (ev.clientY - r.top) / r.height * view.h;
-        zoom(ev.deltaY > 0 ? 1.12 : 0.89, cx, cy);
-      }, { passive: false });
-      el.addEventListener('touchstart', function (ev) {
-        if (ev.touches.length === 2) pinch = Math.hypot(ev.touches[0].clientX - ev.touches[1].clientX, ev.touches[0].clientY - ev.touches[1].clientY);
-      });
-      el.addEventListener('touchmove', function (ev) {
-        if (ev.touches.length !== 2 || !pinch) return;
-        ev.preventDefault();
-        var d = Math.hypot(ev.touches[0].clientX - ev.touches[1].clientX, ev.touches[0].clientY - ev.touches[1].clientY);
-        if (Math.abs(d - pinch) > 6) { zoom(pinch / d); pinch = d; }
-      }, { passive: false });
-      el.addEventListener('touchend', function () { pinch = null; });
-    })();
-
-    document.getElementById('areaFilter').addEventListener('click', function (e) {
-      var b = e.target.closest('[data-filter]'); if (!b) return;
-      filterArea = b.dataset.filter; render();
-    });
-
-    document.getElementById('areaPick').addEventListener('click', function (e) {
-      var b = e.target.closest('[data-pick]'); if (!b) return;
-      var v = b.dataset.pick;
-      if (v === '__new') {
-        var n = (prompt('New area name') || '').trim().toLowerCase();
-        if (!n) return;
-        state.areas = state.areas || [];
-        if (state.areas.indexOf(n) < 0 && DEFAULT_AREAS.indexOf(n) < 0) state.areas.push(n);
-        newArea = n; saveLocal(); schedulePush();
-      } else newArea = v;
-      renderAreas();
-    });
-
-    var range = document.getElementById('urgRange');
-    function paintUrg() {
-      var p = clampP(range.value); newPrio = p;
-      document.getElementById('urgWrap').style.setProperty('--u', LISTC[p]);
-      document.getElementById('urgNum').textContent = p;
-      document.getElementById('urgLbl').textContent = LABEL[p];
-    }
-    range.addEventListener('input', paintUrg); paintUrg();
-
-    function submitTask() {
-      var ti = document.getElementById('fTitle');
-      var title = ti.value.trim(); if (!title) { ti.focus(); return; }
-      addTask(title, document.getElementById('fStep').value.trim(), newPrio, current, [], newArea);
-      ti.value = ''; document.getElementById('fStep').value = '';
-      saveLocal(); render(); schedulePush();
-    }
-    document.getElementById('addBtn').addEventListener('click', submitTask);
-    ['fTitle', 'fStep'].forEach(function (id) {
-      document.getElementById(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submitTask(); } });
-    });
-
-    document.getElementById('toggleList').addEventListener('click', function () {
-      var l = document.getElementById('list'); l.classList.toggle('on');
-      this.textContent = l.classList.contains('on') ? 'Hide all' : 'Show all';
-    });
-    document.getElementById('toggleWait').addEventListener('click', function () {
-      document.getElementById('waitList').classList.toggle('on');
-      renderWaiting();
-    });
-    document.getElementById('waitList').addEventListener('click', function (e) {
-      var b = e.target.closest('button'); if (!b) return;
-      if (b.dataset.unwait) { var t = state.tasks[b.dataset.unwait]; if (t) stopWaiting(t); }
-      else if (b.dataset.wdone) complete(b.dataset.wdone);
-      renderWaiting();
-    });
-
-    document.getElementById('toggleIO').addEventListener('click', function () {
-      var io = document.getElementById('io');
-      io.classList.toggle('on');
-      if (io.classList.contains('on')) document.getElementById('whyBox').value = whyList().join('\n');
-    });
-    document.getElementById('whySave').addEventListener('click', function () {
-      var lines = document.getElementById('whyBox').value.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean);
-      state.why = lines; state.whyAt = now();
-      saveLocal(); schedulePush(); render();
-      var b = this; b.textContent = 'Saved'; setTimeout(function () { b.textContent = 'Save reasons'; }, 1600);
-    });
-    document.getElementById('toggleCalm').addEventListener('click', function () { calm = !calm; saveLocal(); applyCalm(); });
-
+    document.getElementById('ioClose').addEventListener('click', function () { document.getElementById('io').classList.remove('on'); });
     document.getElementById('ioLoad').addEventListener('click', function () {
       var n = importText(document.getElementById('ioBox').value);
       document.getElementById('ioBox').value = '';
       saveLocal(); render(); schedulePush();
       this.textContent = n ? 'Added ' + n : 'Nothing new';
-      var b = this; setTimeout(function () { b.textContent = 'Import'; }, 1800);
+      var b = this; setTimeout(function () { b.textContent = 'Import to Inbox'; }, 1800);
     });
     document.getElementById('ioCopy').addEventListener('click', function () {
       var txt = exportText();
       document.getElementById('ioBox').value = txt;
       var b = this;
       if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () {
-        b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy list out'; }, 1600);
+        b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy board out'; }, 1600);
       }).catch(function () {});
     });
+    document.getElementById('whySave').addEventListener('click', function () {
+      state.why = document.getElementById('whyBox').value.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+      state.whyAt = now(); saveLocal(); schedulePush();
+      var b = this; b.textContent = 'Saved'; setTimeout(function () { b.textContent = 'Save reasons'; }, 1600);
+    });
+    document.getElementById('toggleCalm').addEventListener('click', function () { calm = !calm; saveLocal(); applyCalm(); });
+    document.getElementById('clearDone').addEventListener('click', function () {
+      if (!confirm('Remove everything from Done?')) return;
+      Object.keys(state.tasks).forEach(function (k) {
+        var t = state.tasks[k];
+        if (t && t.col === 'done' && t.list === current) { t.deleted = true; t.updatedAt = now(); }
+      });
+      saveLocal(); schedulePush(); render();
+    });
     document.getElementById('forget').addEventListener('click', function () {
-      if (!confirm('Lock this device? Your list stays synced, you just need the passphrase again.')) return;
-      localStorage.removeItem(DEVKEY);
-      location.reload();
-    });
-
-    document.getElementById('tstop').addEventListener('click', stopTimer);
-    document.getElementById('tplus').addEventListener('click', function () {
-      if (!timer.running) { startTimer(5); return; }
-      if (timer.mode === 'up') {                 // pull it back into countdown
-        timer.mode = 'down'; timer.left = 300; timer.planned += 5;
-        document.getElementById('timer').classList.remove('over');
-      } else { timer.left += 300; timer.planned += 5; }
-      document.getElementById('clock').textContent = fmt(timer.left);
-    });
-    document.getElementById('timer').addEventListener('click', function (e) {
-      var b = e.target.closest('[data-set]'); if (!b) return;
-      startTimer(parseInt(b.dataset.set, 10));
-    });
-    document.getElementById('tCustom').addEventListener('keydown', function (e) {
-      if (e.key !== 'Enter') return;
-      var v = parseInt(this.value, 10);
-      if (v > 0 && v <= 480) { startTimer(v); this.value = ''; this.blur(); }
+      if (!confirm('Lock this device? Your board stays synced, you just need the passphrase again.')) return;
+      localStorage.removeItem(DEVKEY); location.reload();
     });
 
     document.addEventListener('keydown', function (e) {
       var tag = (e.target.tagName || '').toLowerCase();
       if (tag === 'input' || tag === 'textarea') return;
-      var t = topOf(current), k = e.key.toLowerCase();
-      if (e.key === 'Escape' && mapOn) { e.preventDefault(); closeMap(); return; }
-      if (e.key === 'Escape' && focusOn) { e.preventDefault(); closeFocus(); return; }
-      if (k === 'm') { e.preventDefault(); mapOn ? closeMap() : openMap(); return; }
+      var k = e.key.toLowerCase();
+      if (e.key === 'Escape') { if (focusOn) closeFocus(); else document.getElementById('io').classList.remove('on'); return; }
       if (k === 'f') { e.preventDefault(); focusOn ? closeFocus() : openFocus(); return; }
-      if (k === 'n') { e.preventDefault(); document.getElementById('fTitle').focus(); return; }
-      if (!t) return;
-      if (k === 'e') { e.preventDefault(); editing = { id: t.id, field: 'title' }; render(); }
-      else if (k === 'd') complete(t.id);
-      else if (k === 's') skip(t.id);
+      if (k === 'n') { e.preventDefault(); addingIn = 'inbox'; mobileCol = 'inbox'; render(); return; }
+      if (!focusOn) return;
+      var t = focusTask(); if (!t) return;
+      if (k === 'd') { stopTimer(); moveTo(t.id, 'done', 0); }
       else if (k === 't') startTimer(15);
       else if (k === 'b') { e.preventDefault(); var sa = document.getElementById('subAdd'); if (sa) sa.focus(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); nudge(t.id, 1); }
-      else if (e.key === 'ArrowDown') { e.preventDefault(); nudge(t.id, -1); }
     });
 
+    window.addEventListener('resize', function () { render(); });
     document.addEventListener('visibilitychange', function () { if (!document.hidden) pull(true); });
     window.addEventListener('focus', function () { pull(true); });
-    setInterval(function () { if (!document.hidden) pull(true); }, PULL_MS);
+    setInterval(function () { if (!document.hidden) { if (reapWaiting()) render(); pull(true); } }, PULL_MS);
   }
 
   function applyCalm() {
     document.body.classList.toggle('calm', !!calm);
-    document.getElementById('toggleCalm').textContent = 'Calm mode: ' + (calm ? 'on' : 'off');
+    var b = document.getElementById('toggleCalm');
+    if (b) b.textContent = 'Calm mode: ' + (calm ? 'on' : 'off');
   }
 
   /* ══════════ unlock ══════════ */
@@ -1732,35 +1140,31 @@ footer { margin-top: 22px; text-align: center; font-size: 12px; color: var(--fai
     storeKey = d.storeKey; cryptoKey = d.cryptoKey;
     if (remember) { try { localStorage.setItem(DEVKEY, pass); } catch (e) {} }
     loadLocal();
+    migrate();
     reapWaiting();
     document.getElementById('lock').classList.add('hide');
     document.getElementById('app').classList.remove('hide');
     wire(); applyCalm(); render();
     await pull();
+    migrate(); reapWaiting(); render();
   }
 
   var pw = document.getElementById('pw'), warn = document.getElementById('lockWarn');
   async function tryUnlock() {
     var v = pw.value;
-    if (v.length < 8) { warn.textContent = 'Use at least 8 characters. This is what protects your list.'; return; }
+    if (v.length < 8) { warn.textContent = 'Use at least 8 characters. This is what protects your board.'; return; }
     warn.textContent = '';
-    document.getElementById('unlock').disabled = true;
-    document.getElementById('unlock').textContent = 'Unlocking…';
+    var btn = document.getElementById('unlock');
+    btn.disabled = true; btn.textContent = 'Unlocking…';
     try { await start(v, true); }
-    catch (e) {
-      warn.textContent = 'Could not unlock: ' + (e && e.message ? e.message : e);
-      document.getElementById('unlock').disabled = false;
-      document.getElementById('unlock').textContent = 'Unlock';
-    }
+    catch (e) { warn.textContent = 'Could not unlock: ' + (e && e.message ? e.message : e); btn.disabled = false; btn.textContent = 'Unlock'; }
   }
   document.getElementById('unlock').addEventListener('click', tryUnlock);
   pw.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryUnlock(); });
 
-  // a device that has been unlocked before goes straight in
   try {
     var saved = localStorage.getItem(DEVKEY);
-    if (saved) start(saved, false);
-    else pw.focus();
+    if (saved) start(saved, false); else pw.focus();
   } catch (e) { pw.focus(); }
 })();
 </script>
