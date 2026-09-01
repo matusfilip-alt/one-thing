@@ -587,6 +587,15 @@ body.dark-flash #flashWhy b { color: rgba(242,242,244,.32); }
 
   function migrate() {
     var changed = false, n = 0;
+    // rescue cards saved without a board: they existed but could never be shown
+    Object.keys(state.tasks).forEach(function (k) {
+      var t = state.tasks[k];
+      if (t && !t.deleted && t.list !== 'work' && t.list !== 'personal') {
+        t.list = 'work'; t.col = t.col || 'inbox';
+        if (typeof t.order !== 'number') t.order = t.created || now();
+        t.updatedAt = now(); changed = true;
+      }
+    });
     Object.keys(state.tasks).forEach(function (k) {
       var t = state.tasks[k];
       if (!t || t.col) return;
@@ -673,7 +682,7 @@ body.dark-flash #flashWhy b { color: rgba(242,242,244,.32); }
   function addCard(title, col) {
     var id = uid();
     state.tasks[id] = { id: id, title: title, step: '', area: newArea || '', subs: [],
-      col: col || 'inbox', order: orderAt(col || 'inbox', 9e9), created: now(),
+      list: current, col: col || 'inbox', order: orderAt(col || 'inbox', 0), created: now(),
       done: false, completedAt: null, deleted: false, waiting: null, chase: null, updatedAt: now() };
     saveLocal(); render(); schedulePush();
     return state.tasks[id];
