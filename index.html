@@ -204,10 +204,24 @@ body.working #focus .ftitle, body.calm #focus .ftitle { animation: none; }
 }
 .fstep { font-size: clamp(15px, 2.4vw, 20px); line-height: 1.45; color: rgba(242,242,244,.62); max-width: 30ch; }
 .fstep b { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--fu, #ff3b30); margin-bottom: 7px; font-weight: 600; }
-.fsub { display: inline-flex; align-items: center; gap: 12px; font: inherit; font-size: clamp(15px, 2.2vw, 19px);
-  background: rgba(255,255,255,.05); border: none; color: #f2f2f4; padding: 13px 20px 13px 16px; border-radius: 14px; cursor: pointer; }
-.fsub .fbox { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid rgba(242,242,244,.35); flex: 0 0 20px; }
-.fsub:hover { background: rgba(255,255,255,.09); }
+/* the whole checklist, so any step can be ticked in any order */
+.fsublist { display: flex; flex-direction: column; gap: 7px; width: 100%; max-width: 34ch;
+  margin-inline: auto; max-height: 32vh; overflow-y: auto; padding-right: 2px; }
+.fsublist::-webkit-scrollbar { width: 5px; }
+.fsublist::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 3px; }
+.fsub { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; font: inherit; font-size: clamp(14.5px, 2vw, 17px);
+  background: rgba(255,255,255,.05); border: none; color: #f2f2f4; padding: 12px 16px; border-radius: 13px; cursor: pointer;
+  transition: background .18s, opacity .25s; }
+.fsub .fbox { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid rgba(242,242,244,.35); flex: 0 0 20px; position: relative; }
+.fsub .slbl { flex: 1; }
+.fsub:hover { background: rgba(255,255,255,.10); }
+.fsub.next { background: rgba(255,255,255,.12); font-weight: 590; }
+.fsub.next .fbox { border-color: var(--fu, #ff3b30); border-width: 2px; }
+.fsub.sdone { opacity: .5; }
+.fsub.sdone .slbl { text-decoration: line-through; }
+.fsub.sdone .fbox { background: #30b866; border-color: #30b866; }
+.fsub.sdone .fbox::after { content: ""; position: absolute; left: 6.5px; top: 3px; width: 5px; height: 10px;
+  border: solid #08080a; border-width: 0 2px 2px 0; transform: rotate(43deg); }
 .fsubn { font-size: 11.5px; color: rgba(242,242,244,.3); letter-spacing: .04em; }
 
 .fbottom { display: flex; flex-direction: column; align-items: center; gap: 18px; }
@@ -872,8 +886,11 @@ body.dark-flash #flashWhy b { color: rgba(242,242,244,.32); }
       '<div class="fmain">' +
         '<div class="ftitle">' + escH(t.title) + '</div>' +
         (t.step ? '<div class="fstep"><b>Start by</b>' + escH(t.step) + '</div>' : '') +
-        (nextI >= 0 ? '<button class="fsub" data-f="sub"><span class="fbox"></span>' + escH(subs[nextI].text) + '</button>' +
-          (subs.length > 1 ? '<div class="fsubn">' + doneN + ' of ' + subs.length + ' steps done</div>' : '') : '') +
+        (subs.length ? '<div class="fsublist">' + subs.map(function (s, i) {
+            return '<button class="fsub' + (s.done ? ' sdone' : '') + (i === nextI ? ' next' : '') + '" data-sub="' + i + '">' +
+              '<span class="fbox"></span><span class="slbl">' + escH(s.text) + '</span></button>';
+          }).join('') + '</div>' +
+          '<div class="fsubn">' + doneN + ' of ' + subs.length + ' steps done</div>' : '') +
         '<div class="subadd" style="margin-top:18px"><span class="plus">+</span><input id="subAdd" placeholder="' +
           (subs.length ? 'Add another step' : 'Break it into steps') + '" maxlength="140"></div>' +
       '</div>' +
@@ -1117,9 +1134,18 @@ body.dark-flash #flashWhy b { color: rgba(242,242,244,.32); }
     });
 
     document.getElementById('focus').addEventListener('click', function (e) {
+      // any step in the checklist can be ticked or unticked, in any order
+      var sb = e.target.closest('[data-sub]');
+      if (sb) {
+        var ft = focusTask(); if (!ft) return;
+        var i = parseInt(sb.dataset.sub, 10);
+        if (ft.subs && ft.subs[i]) { ft.subs[i].done = !ft.subs[i].done; touch(ft); }
+        return;
+      }
       var b = e.target.closest('[data-f]'); if (!b) return;
       var a = b.dataset.f, t = focusTask();
       if (a === 'exit') return closeFocus();
+      if (a === 'sub') return;                      // handled by the checklist below
       if (!t) return closeFocus();
       if (a === 'done') { stopTimer(); moveTo(t.id, 'done', 0); }
       else if (a === 'drop') { if (confirm('Delete “' + t.title + '”? This cannot be undone.')) { stopTimer(); dropCard(t.id); } }
