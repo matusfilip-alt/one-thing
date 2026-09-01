@@ -932,8 +932,12 @@ body.dark-flash #flashWhy b { color: rgba(242,242,244,.32); }
     }
     shoot(W * 0.12, -Math.PI / 3);          // bottom left, firing up and right
     shoot(W * 0.88, -Math.PI * 2 / 3);      // bottom right, firing up and left
-    var g = 0.42 * dpr, t0 = performance.now();
+    var g = 0.42 * dpr, t0 = performance.now(), finished = false;
+    function done() { if (finished) return; finished = true; ctx.clearRect(0, 0, W, H); cv.style.display = 'none'; }
+    // a hidden tab runs no animation frames at all, so make sure it always clears itself
+    setTimeout(done, 5000);
     (function frame(now) {
+      if (finished) return;
       var el = now - t0, alive = 0;
       ctx.clearRect(0, 0, W, H);
       for (var i = 0; i < P.length; i++) {
@@ -950,7 +954,7 @@ body.dark-flash #flashWhy b { color: rgba(242,242,244,.32); }
         ctx.restore();
       }
       if (alive && el < 4200) requestAnimationFrame(frame);
-      else { ctx.clearRect(0, 0, W, H); cv.style.display = 'none'; }
+      else done();
     })(t0);
   }
 
