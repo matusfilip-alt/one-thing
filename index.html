@@ -313,6 +313,7 @@ body.dark-flash #flashWhy b { color: rgba(242,242,244,.32); }
   <textarea id="whyBox" style="min-height:110px"></textarea>
   <div class="iorow"><button class="btn tinted" id="whySave">Save reasons</button></div>
   <h3>This device</h3>
+  <p>Board ID <code id="boardId">…</code> — this must be identical on your laptop and your phone. If it differs, the passphrase differs, and you are looking at a different board.</p>
   <div class="iorow">
     <button class="btn quiet" id="toggleCalm">Calm mode: off</button>
     <button class="btn quiet" id="clearDone">Clear Done column</button>
@@ -1167,6 +1168,8 @@ body.dark-flash #flashWhy b { color: rgba(242,242,244,.32); }
     document.getElementById('ioBtn').addEventListener('click', function () {
       document.getElementById('io').classList.add('on');
       document.getElementById('whyBox').value = whyList().join('\n');
+      // a hash of the passphrase, safe to read out loud, and identical on devices that match
+      document.getElementById('boardId').textContent = (storeKey || '').slice(4, 16);
     });
     document.getElementById('ioClose').addEventListener('click', function () { document.getElementById('io').classList.remove('on'); });
     document.getElementById('ioLoad').addEventListener('click', function () {
