@@ -315,6 +315,10 @@ body.dark-flash #flashWhy b { color: rgba(242,242,244,.32); }
   <h3>This device</h3>
   <p>Board ID <code id="boardId">…</code> — this must be identical on your laptop and your phone. If it differs, the passphrase differs, and you are looking at a different board.</p>
   <div class="iorow">
+    <button class="btn quiet" id="showPass">Show this device's passphrase</button>
+  </div>
+  <p id="passOut" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:15px;color:var(--ink)"></p>
+  <div class="iorow">
     <button class="btn quiet" id="toggleCalm">Calm mode: off</button>
     <button class="btn quiet" id="clearDone">Clear Done column</button>
     <button class="btn quiet" id="forget">Lock this device</button>
@@ -1191,6 +1195,14 @@ body.dark-flash #flashWhy b { color: rgba(242,242,244,.32); }
       state.why = document.getElementById('whyBox').value.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean);
       state.whyAt = now(); saveLocal(); schedulePush();
       var b = this; b.textContent = 'Saved'; setTimeout(function () { b.textContent = 'Save reasons'; }, 1600);
+    });
+    // this device already stores it, so showing it to whoever is sitting here reveals nothing new
+    document.getElementById('showPass').addEventListener('click', function () {
+      var p = '';
+      try { p = localStorage.getItem(DEVKEY) || ''; } catch (e) {}
+      document.getElementById('passOut').textContent = p
+        ? p + '   (board ' + (storeKey || '').slice(4, 12) + ')'
+        : 'This device does not remember it.';
     });
     document.getElementById('toggleCalm').addEventListener('click', function () { calm = !calm; saveLocal(); applyCalm(); });
     document.getElementById('clearDone').addEventListener('click', function () {
